@@ -228,6 +228,215 @@ tests/                       # Evaluation suites, ablations, baselines & parity 
 
 ---
 
+---
+
+## Appendix: Synthetic Dataset Generation Details
+
+This appendix reports the detailed configuration of the synthetic workload generator used for the benchmark dataset. These parameters are omitted from the main text for conciseness but are provided here to support reproducibility.
+
+### A.1 Entity Space and Open-World Allocation
+
+The benchmark contains $N=200{,}000$ chronologically ordered access events covering approximately 306 days of simulated activity.
+
+<!-- TODO: insert here the table describing the entity space (users, devices, resources, ...). It was not included in the source text. -->
+
+User 0 is reserved for an automated maintenance account operating from three dedicated servers. Human users may occasionally access these systems, while ordinary workstations can be shared by multiple users.
+
+Devices are distributed across three security-posture tiers:
+
+- **Tier 0**: unmanaged devices that do not present client certificates;
+- **Tier 1**: managed devices using software-backed certificates;
+- **Tier 2**: hardware-attested devices using a Trusted Platform Module (TPM).
+
+To prevent novelty from becoming a trivial anomaly signal, benign and malicious activity draw identifiers from common open-world pools. Fresh slots are used for events such as IP roaming, device-cookie resets, client-version updates, and attack-related entity substitutions.
+
+### A.2 Benign Behavioral Model
+
+#### A.2.1 Multilevel Access-Control Policy
+
+Each request is generated under a Bell–LaPadula-inspired multilevel access policy. Users belong to one of four roles with associated clearance levels: `guest` (0), `operator` (1), `manager` (2), and `admin` (4).
+
+Resources belong to one of five security classifications: `PUBLIC`, `INTERNAL`, `CONFIDENTIAL`, `SECRET`, and `TOP_SECRET`, and may additionally belong to one or more of six compartments: `public`, `hr`, `finance`, `ops`, `nuclear`, and `security`.
+
+Read operations satisfy the Simple Security Property,
+
+$$
+\mathrm{clearance}(u) \geq \mathrm{classification}(r),
+$$
+
+whereas mutating operations satisfy the corresponding $\ast$-Property,
+
+$$
+\mathrm{clearance}(u) \leq \mathrm{classification}(r).
+$$
+
+Compartment inclusion is also required. A single trusted sanitization endpoint allows controlled administrative write-down.
+
+#### A.2.2 Habitual and Exploratory Access
+
+Each user is assigned a habitual profile containing 50% of the route–method pairs authorized for the corresponding role. During normal operation, a request targets a habitual endpoint with probability
+
+$$
+1-p_{\mathrm{explore}},
+$$
+
+and another authorized endpoint with probability
+
+$$
+p_{\mathrm{explore}} = 0.15.
+$$
+
+This controlled exploration ensures that unusual but policy-compliant resource access is not automatically equivalent to malicious behavior.
+
+#### A.2.3 Temporal Activity Model
+
+Event inter-arrival times are sampled from a non-homogeneous Poisson process. For consecutive events,
+
+$$
+\Delta t = \max\left(1,\left\lfloor \Delta\tau \right\rfloor\right),
+\qquad
+\Delta\tau \sim \mathrm{Exp}\left(\lambda(t)\right),
+$$
+
+with time-dependent scale
+
+$$
+\lambda(t)=
+\begin{cases}
+45\ \mathrm{s}, & \text{weekday working hours (08:00–18:00)},\\
+600\ \mathrm{s}, & \text{weekday nights},\\
+1200\ \mathrm{s}, & \text{weekends}.
+\end{cases}
+$$
+
+This produces daily and weekly activity cycles while retaining stochastic variation in request timing.
+
+#### A.2.4 Resource Popularity
+
+Resource-access probabilities follow a discrete Zipf distribution,
+
+$$
+w(r)=\frac{1}{\left(\mathrm{rank}(r)+1\right)^s},
+\qquad s=1.2.
+$$
+
+The popularity rank is assigned through a random permutation of the 1000 resources at initialization. This prevents the numeric resource identifier itself from encoding frequency information and preserves comparable destination marginals across benign and malicious traffic.
+
+#### A.2.5 Mobility, Churn, and Background Noise
+
+The benign stream includes several sources of organizational variability:
+
+- **Shared devices:** $p_{\mathrm{shared}}=0.20$ of physical devices are assigned to 2–4 legitimate users.
+- **Hot-desking:** novel but legitimate user–workstation associations occur with probability $p_{\mathrm{hotdesk}}=0.02$.
+- **Network roaming:** $p_{\mathrm{roam}}=0.10$ of benign requests originate outside the user's registered office or home network.
+- **Fresh network sources:** conditional on roaming, a previously unseen IP address is selected with probability $p_{\mathrm{new\_src}}=0.30$ from a shared pool of 6000 addresses.
+- **Software releases:** new client versions are introduced with rate $p_{\mathrm{release}}=2.5\times10^{-4}$ per step.
+- **Software adoption:** existing endpoints adopt a released version with probability $p_{\mathrm{adopt}}=0.05$ on subsequent accesses.
+- **Ad-hoc client configurations:** non-habitual command-line or client configurations occur with probability $p_{\mathrm{new\_cfg}}=0.003$.
+- **Device-cookie resets:** cookie-identified devices lose their persistent token with probability $p_{\mathrm{wipe}}=10^{-3}$ and subsequently reappear as cold nodes.
+- **Benign policy denials:** legitimate users generate unauthorized requests with probability $p_{\mathrm{denial}}=0.02$.
+- **IDS background noise:** each of the three Snort-derived sensor indicators independently generates false positives with probability $p_{\mathrm{fp}}=0.01$.
+
+These mechanisms create benign structural novelty, reducing the likelihood that the detector learns simplistic rules based solely on first-seen relationships or identifiers.
+
+### A.3 Attack Injection Parameters
+
+The generator assigns each event to one of six mutually exclusive classes: benign traffic, policy violation, contextual/reconnaissance anomaly, lateral movement, credential theft, or benign denial. Malicious events account for 1.34% of the complete stream.
+
+#### A.3.1 Credential Theft
+
+Credential-theft scenarios model an attacker operating with valid credentials stolen from a human user. Hardware-attested Tier 2 credentials are excluded from theft scenarios.
+
+Incidents are initiated with probability
+
+$$
+p_{\mathrm{theft}} = 1.2\times10^{-3}
+$$
+
+per generation step. Each incident produces a sequence of 3–6 malicious requests interleaved with benign traffic at rate
+
+$$
+p_{\mathrm{interleave}} = 0.06.
+$$
+
+To make credential misuse difficult to detect from isolated request features, the attacker reproduces part of the victim's environment:
+
+- the victim's device cookie is replayed with probability $p_{\mathrm{replay}}=0.50$;
+- otherwise, a fresh device identifier is allocated from the shared open-world pool;
+- a known fleet proxy is used with probability $p_{\mathrm{known\_src}}=0.70$;
+- the victim's habitual JA3 configuration is reproduced with probability $p_{\mathrm{mimic\_cfg}}=0.70$;
+- requested resources remain compatible with the victim's assigned role.
+
+As a consequence, many credential-theft requests contain individually plausible attributes. The anomaly is therefore primarily encoded in the historical consistency of configuration–device–user relationships.
+
+#### A.3.2 Lateral Movement
+
+Lateral movement is modeled as post-compromise activity. Initial compromise mechanisms such as phishing or zero-day exploitation are treated as out-of-band events and do not directly appear as graph interactions.
+
+An uncompromised host becomes compromised with per-step hazard
+
+$$
+p_{\mathrm{comp}} = 6\times10^{-4}.
+$$
+
+A compromised host progresses through three stages:
+
+1. **Reconnaissance:** 1–3 requests with elevated sensor activity and untrusted client configurations;
+2. **Lateral expansion:** 5–11 requests directed toward protected resources;
+3. **Dwell and remediation:** 0–4 requests before the host returns to a clean state.
+
+During reconnaissance, the three sensor indicators trigger with probabilities $0.80$, $0.50$, and $0.20$, respectively.
+
+Compromised systems alternate malicious and benign actions: attack requests are emitted with probability $0.30$, while legitimate user activity continues with probability $0.70$.
+
+Each compromised host also harvests between one and three credentials. Credentials are sampled from locally cached sessions with probability
+
+$$
+p_{\mathrm{cached}} = 0.70,
+$$
+
+and from unrelated fleet identities otherwise. During lateral expansion, foreign harvested credentials are used with probability
+
+$$
+p_{\mathrm{foreign}} = 0.70,
+$$
+
+creating previously unseen or historically unlikely device–user associations. In the remaining 30% of lateral actions, the local identity is used to access non-habitual but authorized resources.
+
+During the lateral-expansion phase, TLS and IDS indicators are intentionally kept close to benign conditions, with trusted TLS configuration and background sensor rate $p_{\mathrm{fp}}=0.01$. This design forces detection to rely primarily on temporal and relational structure rather than explicit perimeter alerts.
+
+### A.4 Temporal Partitioning and Leakage Controls
+
+#### A.4.1 Chronological Partition
+
+The event stream is partitioned strictly in chronological order:
+
+| Split | Days | Events | Share |
+|---|---|---|---|
+| Training | first 214 | $N_{\mathrm{train}}=140{,}000$ | 70% |
+| Validation | 215–245 | $N_{\mathrm{val}}=20{,}000$ | 10% |
+| Test | 246–306 | $N_{\mathrm{test}}=40{,}000$ | 20% |
+
+The training partition is used for one-class temporal representation learning, validation for score calibration and threshold selection, and the test partition exclusively for sequential event-by-event evaluation.
+
+#### A.4.2 Rationale for Chronological Evaluation
+
+In continuous-time graph models, every observed edge can modify node memory and temporal neighborhoods. A random split would therefore allow future interactions to influence the representation used to evaluate earlier events, violating temporal causality.
+
+Chronological evaluation instead reproduces deployment conditions, where each prediction is based exclusively on previously observed interactions, while also exposing the model to entity churn, behavioral drift, and attack campaigns occurring later in the stream.
+
+#### A.4.3 Leakage-Prevention Measures
+
+The experimental pipeline applies the following safeguards against future-information leakage:
+
+1. **One-class training.** Loss computation and temporal-memory updates during training use only ground-truth benign events ($y_i=0$); attack events are excluded.
+2. **Epoch-level state reset.** Node memories, temporal-neighbor buffers, pairwise recency tables, and interaction counters are reinitialized at each training epoch.
+3. **Open-world identity projection.** Entity identifiers are deterministically mapped with BLAKE2b into $10^5$ embedding buckets, allowing unseen test-time entities to be represented without vocabulary retraining.
+4. **Bounded temporal recency.** Elapsed time is capped at $\Delta_{\max}=7$ days, while absolute timestamps are excluded from the model input to prevent time itself from identifying the dataset split.
+5. **Validation-only calibration.** Score calibration and threshold selection use validation data only. Alert-related state is cleared before test replay.
+6. **Policy-gated online updates.** During sequential evaluation, temporal memory is updated only for requests accepted by the PDP and satisfying the configured sensor-integrity conditions. Denied events therefore cannot directly modify the behavioral baseline.
+
+
 ## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
