@@ -2,8 +2,8 @@
 
 Rationale:
   A classic, non-relational unsupervised detector that — like the Isolation Forest
-  baseline — sees each access event as an i.i.d. static feature vector with no graph
-  structure or temporal history. One-Class SVM (RBF kernel) is the other canonical
+  baseline — sees each access event as a static feature vector with no graph
+  structure. One-Class SVM (RBF kernel) is the other canonical
   "novelty detection" reference reviewers expect alongside Isolation Forest, so the
   gap between it and the TGN again quantifies how much detection comes from
   structure / interaction history rather than the raw features of a single event.
@@ -28,6 +28,7 @@ canonical data generator; it is not installed on the host). See README.md.
 """
 
 import random
+import argparse
 
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -42,7 +43,7 @@ from graphagate.eval_common import binary_metrics, causal_hist_features, causal_
 OCSVM_FIT_SAMPLES = 5000
 
 
-def _build_features(msg, src, dst, node_features, y):
+def _build_features(msg, src, dst, node_features, y, *, label_horizon: int):
     """Per-event features: edge msg (msg_dim) ⊕ src attrs (16) ⊕ dst attrs (16) ⊕ hist (3).
 
     Identical to the Isolation Forest baseline (incl. the causal interaction-history
@@ -55,11 +56,13 @@ def _build_features(msg, src, dst, node_features, y):
     nf_np = node_features.numpy()
     src_feat = nf_np[src.numpy()]
     dst_feat = nf_np[dst.numpy()]
-    hist = causal_hist_features(src.numpy(), dst.numpy(), y.numpy())  # [N, 3]
+    hist = causal_hist_features(
+        src.numpy(), dst.numpy(), y.numpy(), label_horizon=label_horizon
+    )  # [N, 3]
     return np.concatenate([msg_np, src_feat, dst_feat, hist], axis=1)
 
 
-def ocsvm_baseline(cfg: TGNConfig = TGNConfig()):
+def ocsvm_baseline(cfg: TGNConfig = TGNConfig(), use_precursor: bool = True):
     np.random.seed(cfg.seed)
     random.seed(cfg.seed)
 
@@ -72,19 +75,28 @@ def ocsvm_baseline(cfg: TGNConfig = TGNConfig()):
         stream.node_features,
     )
 
-    X = _build_features(msg, src, dst, node_features, y)
     y_np = y.numpy()
     types_np = types.numpy()
-
-    # Kill-chain precursor prior (same multiplicative factor + params as the TGN).
-    precursor_fac = causal_precursor_factor(
-        src.numpy(), t.numpy(), msg.numpy(), cfg.precursor_half_life, cfg.precursor_max_boost
-    )
 
     n = len(src)
     n_train = int(n * cfg.train_frac)
     n_val = int(n * cfg.val_frac)
     train_end, val_end = n_train, n_train + n_val
+
+    # Build history with labels available only through the calibration boundary.
+    # Without the horizon, test labels leak into the counters of later test events.
+    X = _build_features(
+        msg, src, dst, node_features, y, label_horizon=val_end
+    )
+
+    # Kill-chain precursor prior (same multiplicative factor + params as the TGN).
+    if use_precursor:
+        precursor_fac = causal_precursor_factor(
+            src.numpy(), t.numpy(), msg.numpy(),
+            cfg.precursor_half_life, cfg.precursor_max_boost,
+        )
+    else:
+        precursor_fac = np.ones(len(src), dtype=np.float64)
 
     X_train, y_train = X[:train_end], y_np[:train_end]
     X_val, y_val = X[train_end:val_end], y_np[train_end:val_end]
@@ -160,7 +172,20 @@ def ocsvm_baseline(cfg: TGNConfig = TGNConfig()):
 
 
 def main():
-    ocsvm_baseline()
+    parser = argparse.ArgumentParser(description="Run the One-Class SVM baseline.")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=TGNConfig().seed,
+        help=f"Random seed for data generation and model fitting (default: {TGNConfig().seed}).",
+    )
+    parser.add_argument(
+        "--no-precursor",
+        action="store_true",
+        help="Disable the causal kill-chain precursor prior.",
+    )
+    args = parser.parse_args()
+    ocsvm_baseline(TGNConfig(seed=args.seed), use_precursor=not args.no_precursor)
 
 
 if __name__ == "__main__":
