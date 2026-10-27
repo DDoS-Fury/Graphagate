@@ -40,6 +40,9 @@ class TGNConfig:
     # machine uses 1-2. Chain: source → config → device → user → resource (+ config → user).
     num_configs: int = 40
     num_events: int = 200000
+    # Attack chains start at the first event after the chronological training prefix.
+    # This keeps the complete training window available to the one-class learner.
+    clean_train_prefix: bool = True
 
     # Spare device slots: cookie wipes (a machine re-keyed as a cold node) and
     # credential-theft attacker devices draw from them. Sized never to recycle (a reused slot

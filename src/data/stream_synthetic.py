@@ -83,6 +83,9 @@ def stream_kwargs_from_cfg(cfg) -> dict:
         num_configs=cfg.num_configs,
         num_resources=cfg.num_resources,
         num_events=cfg.num_events,
+        attack_start_event=(
+            int(cfg.num_events * cfg.train_frac) if cfg.clean_train_prefix else None
+        ),
         num_wipe_slots=cfg.num_wipe_slots,
         num_theft_slots=cfg.num_theft_slots,
         benign_explore_prob=cfg.benign_explore_prob,
@@ -276,6 +279,7 @@ class ZTAStreamSimulator:
         num_new_users: int = 0,
         ramp_guests: bool = False,
         p_benign_new_config: float = 0.0,
+        attack_start_event: int | None = None,
     ):
         if seed is not None:
             np.random.seed(seed)
@@ -316,6 +320,7 @@ class ZTAStreamSimulator:
         self.p_sensor_fp = p_sensor_fp
         self.ramp_guests = ramp_guests
         self.p_benign_new_config = p_benign_new_config
+        self.attack_start_event = attack_start_event
 
         # Build order is fixed: every step below draws from the global RNGs.
         # Popularity rank is a random permutation, so resource ids do not encode frequency.
@@ -786,11 +791,12 @@ class ZTAStreamSimulator:
 
     def _emit(self, req: _Request, res_idx: int, method: int, ja3: float, sensors,
               etype: EventType) -> dict:
-        """Event for ``req`` accessing ``res_idx``; label is 1 for every non-benign type."""
+        """Event for ``req``; policy denials by benign users remain non-anomalous."""
         return self._event(
             source=req.source, config=req.config, device=req.device, user=req.user,
             res_idx=res_idx, feat=self._msg(ja3, sensors, method, req.role, req.clearance),
-            label=int(etype != EventType.BENIGN), etype=etype, scenario=req.scenario,
+            label=int(etype not in (EventType.BENIGN, EventType.BENIGN_DENIAL)),
+            etype=etype, scenario=req.scenario,
         )
 
     def _event(self, *, source, config, device, user, res_idx, feat, label, etype, scenario,
@@ -821,17 +827,30 @@ class ZTAStreamSimulator:
         """Generate the next event: credential theft, benign request, or kill-chain attack."""
         self._advance_clock()
 
-        theft = self._maybe_theft_event()
+        # step_count is one-based: event index 139999 has step_count 140000.
+        # Enabling attacks strictly afterwards keeps the whole training prefix clean.
+        attacks_enabled = (
+            self.attack_start_event is None
+            or self.step_count > self.attack_start_event
+        )
+
+        theft = self._maybe_theft_event() if attacks_enabled else None
         if theft is not None:
             return theft
 
-        if self.p_compromise is not None and random.random() < self.p_compromise:
+        if (
+            attacks_enabled
+            and self.p_compromise is not None
+            and random.random() < self.p_compromise
+        ):
             # Compromise a clean admitted machine at the global rate
             victim_m = int(np.random.randint(0, self._admitted))
             if victim_m not in self.compromised_state:
                 self._compromise(victim_m)
         req = self._sample_request()
         if (
+            attacks_enabled
+            and
             self.p_compromise is None  # legacy per-request hazard
             and np.random.rand() < _P_LEGACY_COMPROMISE and req.machine not in self.compromised_state
         ):
