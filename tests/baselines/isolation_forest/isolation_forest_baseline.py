@@ -1,0 +1,251 @@
+"""Isolation Forest anomaly-detection baseline for Graphagate.
+
+Rationale:
+  The streaming TGN scores each access event using its *relational + temporal*
+  context (recurrent memory + temporal neighbourhood). This baseline deliberately
+  throws all of that away: it treats every event as an i.i.d. static feature
+  vector and runs a classic, non-relational anomaly detector (Isolation Forest)
+  over it. The gap between this and the TGN therefore quantifies how much of the
+  detection — and in particular the *policy* and *lateral-movement* recall — comes
+  from graph structure / interaction history rather than from the raw features of
+  a single event.
+
+Protocol (identical to ``graphagate.train_tgn`` so the numbers sit side by side):
+  1. Same synthetic ZTA stream (same ``TGNConfig`` hyper-parameters + seed).
+  2. Same chronological train(70%) / val(10%) / test(20%) split — the stream is
+     already time-ordered, so we never shuffle.
+  3. Fit unsupervised on the *benign* training events only (``y_train == 0``).
+  4. Calibrate the decision threshold on the *benign validation* slice at the
+     configured ``target_fpr`` (99th percentile of benign scores).
+  5. Report on the *test* slice: aggregate ROC-AUC / AP, precision/recall at the
+     calibrated threshold, and a per-anomaly-type breakdown (policy / contextual /
+     lateral) computed benign-vs-that-type.
+
+Anomaly score orientation:
+  We use ``-score_samples(X)`` so that *higher = more anomalous*, matching the
+  TGN's ``1 - P(benign)`` (see ``graphagate.serve_tgn.anomaly_score``). Sklearn's
+  ``score_samples`` returns the (signed) average path length where *higher = more
+  normal*, so the negation gives the right orientation for calibration and all
+  metrics below.
+
+Run it inside the project's Docker image (torch is required only to import the
+canonical data generator; it is not installed on the host). See README.md.
+"""
+
+import random
+
+import numpy as np
+from sklearn.ensemble import IsolationForest
+from sklearn.metrics import average_precision_score, roc_auc_score
+from sklearn.model_selection import ParameterSampler
+
+from graphagate.config import TGNConfig
+from graphagate.data.stream_synthetic import generate_streaming_data, stream_kwargs_from_cfg
+from graphagate.eval_common import binary_metrics, causal_hist_features, causal_precursor_factor
+
+
+def _build_features(msg, src, dst, node_features, y, *, label_horizon: int):
+    """Per-event feature matrix for the Isolation Forest.
+
+    The 7-dim edge feature ``msg[i]`` concatenated with the 16-dim static attributes of
+    both endpoints (device, destination resource) — 39 dims — PLUS the 3-dim causal
+    interaction-history features (per-pair / per-src benign access counts; see
+    ``graphagate.eval_common``), giving a 42-dim vector. The history columns are the same
+    *family* of counters the TGN maintains online, but the vector is strictly poorer than
+    the TGN's signals: device actor only — no user / source / config identity and none of
+    the binding counters — so this baseline measures what a flat per-event detector gets
+    from device-level counters, not the value of the temporal-graph machinery alone.
+
+    ``label_horizon`` (= ``val_end``) is required, deliberately without a default: past it
+    no ground-truth label reaches the counters and every event commits (the
+    commit-everything gate). Without it the counters of a test event depend on the labels
+    of the test events before it — an oracle the deployed system does not have (attack
+    pairs would stay "never seen" however often they repeat), and one that favours this
+    baseline. The gate is still not exactly the TGN's: past the horizon the TGN commits
+    iff ``not signal_dirty`` (external JA3/sensor signal), here everything commits. They
+    differ only on signal-dirty events — measured on v5 (seeds 2000-2001, test window):
+    lateral 8-14 %, cred-theft 3-5 %, benign 6-7 %; the lookup rules gate on their own
+    binding flags (``proto-self``). Effect on the comparison: small, direction undetermined.
+
+    Tensors are torch tensors → converted to numpy here (sklearn input).
+    """
+    msg_np = msg.numpy()                       # [N, msg_dim]
+    nf_np = node_features.numpy()              # [num_nodes, 16]
+    src_feat = nf_np[src.numpy()]              # [N, 16]  device attributes
+    dst_feat = nf_np[dst.numpy()]              # [N, 16]  destination (resource) attributes
+    hist = causal_hist_features(src.numpy(), dst.numpy(), y.numpy(),
+                                label_horizon=label_horizon)  # [N, 3] benign-gated up to the horizon
+    return np.concatenate([msg_np, src_feat, dst_feat, hist], axis=1)
+
+
+def isolation_forest_baseline(cfg: TGNConfig = TGNConfig(), stream=None, use_precursor: bool = True):
+    """Fit/evaluate the Isolation Forest under the TGN protocol; see the module docstring.
+
+    ``stream`` is an optional pre-built :class:`SyntheticStream` (the data-budget curve
+    passes a truncated tail so every method sees the same events); ``None`` generates it
+    from ``cfg`` exactly as before. ``use_precursor=False`` leaves the scores as the forest
+    produced them (no kill-chain factor in model selection, calibration or test).
+    """
+    # Seed everything up front for reproducibility (the generator re-seeds numpy
+    # and stdlib ``random`` internally too, but we seed here so the IsolationForest
+    # and any incidental randomness are deterministic as well).
+    np.random.seed(cfg.seed)
+    random.seed(cfg.seed)
+
+    if stream is None:
+        print("Generating synthetic streaming data (same params as TGN)...")
+        stream = generate_streaming_data(**stream_kwargs_from_cfg(cfg))
+    # Tabular actor = the DEVICE node (hardware id), the v2 analogue of the old
+    # IP-keyed src; the access target stays the resource.
+    src, dst, t, msg, y, types, node_features = (
+        stream.device, stream.dst, stream.t, stream.msg, stream.y, stream.types,
+        stream.node_features,
+    )
+
+    # Chronological split (the stream is already time-ordered → no shuffling). Computed
+    # before the features: ``val_end`` is the label horizon of the history counters.
+    n = len(src)
+    n_train = int(n * cfg.train_frac)
+    n_val = int(n * cfg.val_frac)
+    train_end, val_end = n_train, n_train + n_val
+
+    # Per-event features incl. causal history counts (no graph structure / temporal context).
+    X = _build_features(msg, src, dst, node_features, y, label_horizon=val_end)
+    y_np = y.numpy()
+    types_np = types.numpy()
+
+    # Kill-chain precursor prior (same multiplicative factor + params as the TGN), applied
+    # to the val/test scores below so the baseline gets the SAME recon→lateral boost.
+    # Measured on v5 (seeds 1000-1004, 200k): the factor alone ranks lateral at AUC 0.82-0.96,
+    # the forest without it is at chance (0.43-0.53) — hence the ``use_precursor=False`` row.
+    if use_precursor:
+        precursor_fac = causal_precursor_factor(
+            src.numpy(), t.numpy(), msg.numpy(), cfg.precursor_half_life, cfg.precursor_max_boost
+        )
+    else:
+        precursor_fac = np.ones(len(src), dtype=np.float64)
+
+    X_train, y_train = X[:train_end], y_np[:train_end]
+    X_val, y_val = X[train_end:val_end], y_np[train_end:val_end]
+    X_test, y_test = X[val_end:], y_np[val_end:]
+    test_types = types_np[val_end:]
+
+    # --- FIT (unsupervised, benign train events only) ------------------------
+    print("--- UNSUPERVISED TRAINING AND TUNING START (Isolation Forest) ---")
+    X_train_benign = X_train[y_train == 0]
+    print(f"Train benign: {X_train_benign.shape[0]} / {X_train.shape[0]} events")
+    
+    param_grid = {
+        'n_estimators': [100, 200, 300, 400],
+        'max_samples': ['auto', 256, 512, 1024],
+        'max_features': [1.0, 0.8, 0.5],
+        'contamination': ['auto', 0.01, 0.05, 0.1]
+    }
+    
+    n_iter = 10
+    param_list = list(ParameterSampler(param_grid, n_iter=n_iter, random_state=cfg.seed))
+    
+    best_model = None
+    best_auc = -1.0
+    best_params = None
+    
+    print(f"Randomized search over {n_iter} combinations (n_jobs=-1)...")
+    for i, params in enumerate(param_list):
+        model = IsolationForest(
+            random_state=cfg.seed,
+            n_jobs=-1,
+            **params
+        )
+        model.fit(X_train_benign)
+        
+        # Validation slice tuning for best hyperparameters
+        # Orientation: higher = more anomalous
+        val_scores_raw = -model.score_samples(X_val)
+        val_scores = val_scores_raw * precursor_fac[train_end:val_end]
+        
+        if len(np.unique(y_val)) > 1:
+            auc = roc_auc_score(y_val, val_scores)
+        else:
+            auc = 0.0
+            
+        print(f"Iter {i+1:2d}/{n_iter} - Val AUC: {auc:.4f} - Params: {params}")
+        
+        if auc > best_auc:
+            best_auc = auc
+            best_model = model
+            best_params = params
+            
+    print(f"\nBest parameters (Val AUC={best_auc:.4f}): {best_params}")
+    model = best_model
+
+    # Anomaly score: higher = more anomalous (matches the TGN's 1 - P(benign)).
+    def anomaly_score(features):
+        return -model.score_samples(features)
+
+    # --- THRESHOLD CALIBRATION (held-out benign slice) -----------------------
+    print("\n--- THRESHOLD CALIBRATION (on the benign validation stream) ---")
+    val_scores = anomaly_score(X_val) * precursor_fac[train_end:val_end]
+    benign_val_scores = val_scores[y_val == 0]
+    if benign_val_scores.size == 0:
+        raise RuntimeError("No benign events in the validation slice for calibration.")
+    threshold = float(np.quantile(benign_val_scores, 1.0 - cfg.target_fpr))
+    print(
+        f"Benign val score: mean={benign_val_scores.mean():.4f} "
+        f"p95={np.quantile(benign_val_scores, 0.95):.4f} | "
+        f"threshold@FPR={cfg.target_fpr}: {threshold:.4f}"
+    )
+
+    # --- TEST EVALUATION -----------------------------------------------------
+    print("\n--- INFERENCE / ANOMALY DETECTION PHASE START ---")
+    test_scores = anomaly_score(X_test) * precursor_fac[val_end:]
+
+    auc = roc_auc_score(y_test, test_scores)
+    ap = average_precision_score(y_test, test_scores)
+    precision, recall = binary_metrics(test_scores, y_test, threshold)
+    print(f"Test Stream | AUC: {auc:.4f} | AP: {ap:.4f}")
+    print(f"At threshold {threshold:.4f} | Precision: {precision:.4f} | Recall: {recall:.4f}")
+
+    # --- PER-ANOMALY-TYPE BREAKDOWN ------------------------------------------
+    # AUC/AP per type computed benign (type 0) vs that type only, so the aggregate
+    # cannot mask a class the detector handles poorly. As for the TGN: contextual
+    # anomalies are near-trivial (separable on edge features), while policy and
+    # lateral anomalies share benign edge features and are the genuinely hard cases
+    # for a non-relational detector — that is exactly the contrast this baseline
+    # is meant to expose.
+    print("\n--- PER-ANOMALY-TYPE METRICS ---")
+    per_type = {}
+    benign = test_types == 0
+    for type_id, name in ((1, "policy"), (2, "contextual"), (3, "lateral"),
+                          (4, "cred-theft"), (5, "exfil"), (6, "benign-denied")):
+        sel = benign | (test_types == type_id)
+        s_sel, l_sel = test_scores[sel], (test_types[sel] == type_id).astype(int)
+        if l_sel.sum() == 0:
+            continue
+        t_auc = roc_auc_score(l_sel, s_sel)
+        t_ap = average_precision_score(l_sel, s_sel)
+        _, t_recall = binary_metrics(s_sel, l_sel, threshold)
+        per_type[name] = {"auc": float(t_auc), "ap": float(t_ap),
+                          "recall": float(t_recall), "n": int(l_sel.sum())}
+        print(f"  {name:10s} | n={int(l_sel.sum()):4d} | AUC: {t_auc:.4f} | "
+              f"AP: {t_ap:.4f} | Recall@thr: {t_recall:.4f}")
+
+    # Machine-readable summary (consumed by tests/regen_report_tables.py). Recall here is
+    # at the global @target_fpr threshold — the apples-to-apples Panel A (tab:baselines) metric.
+    return {
+        "agg_auc": float(auc), "agg_ap": float(ap),
+        "agg_precision": float(precision), "agg_recall": float(recall),
+        "per_type": per_type,
+    }
+
+
+def isolation_forest_no_precursor_baseline(cfg: TGNConfig = TGNConfig(), stream=None):
+    """The forest alone: same features, fit and protocol, scores without the precursor factor."""
+    return isolation_forest_baseline(cfg, stream, use_precursor=False)
+
+
+def main():
+    isolation_forest_baseline()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,14 @@
+# Core ML stack & serving dependencies (mirrors pyproject.toml).
+torch==2.12.*
+torch_geometric>=2.6,<3.0
+numpy>=1.26,<3.0
+scikit-learn>=1.4
+scipy>=1.11
+xgboost>=2.0.0
+tqdm>=4.66
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.29
+psutil>=5.9.0
+codecarbon
+aiohttp
+tensorboard>=2.15

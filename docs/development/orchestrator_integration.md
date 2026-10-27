@@ -1,0 +1,335 @@
+# ZTA Orchestrator and TGN Model Integration
+
+This document clarifies the integration architecture between the Security Orchestrator (which talks to the Policy Decision Point, e.g. OPA) and the TGN (Temporal Graph Network) AI microservice.
+
+## In-Memory State and Graph Storage
+
+The TGN microservice does not require an external vector database (such as Milvus or Pinecone) or graph database to store past interactions.
+
+The model is stateful and maintains its temporal representations directly in RAM using PyTorch tensors:
+- Recurrent node memory (`model.memory`, GRU state) tracks historical interactions per entity.
+- The bounded neighbor store (`MessageNeighborLoader`, pre-allocated ring buffer `O(num_nodes · K)`) maintains the last $K$ temporal interactions per node to support multi-hop attention during inference without graph database queries.
+
+### Execution Flow (Serving)
+
+1. **Request forwarding (tuple, 5-node v4 schema)**
+   The ZTA orchestrator must not pre-process vectors nor query historical databases. It simply forwards the single raw transaction (or event) to the model serving API (`src/serve_tgn.py -> score_event`). Every request is modelled as a **5-edge** causal chain: `source → config`, `config → device`, `config → user`, `device → user` and the access `user → resource`. **The keys are namespaced by TYPE** so an IP can never alias a device slot in the shared `NodeRegistry` (which is a single keyspace for all node types). The requested tuple includes:
+   - `key_user`: identity (e.g. user id from the JWT; `anonymous` for guests).
+   - `key_device`: hardware context — `tpm:<id>` if the TPM is attested, otherwise `ck:<cookie>` (signed persistent cookie/UUID; a new cookie = a never-seen machine). With no hardware id at all, fallback `ipdev:<ip>` (the IP as a weak device) **without** `key_source`. Never use a bare IP as the device.
+   - `key_source` (optional): network context — `src:<ip>` (the client IP, namespaced). If absent, the source→config edge is simply skipped. The model derives from this IP the **internal/external** bit (RFC1918) written to `node_feat[*,5]` of the source node — it is a *feature*, not an authorization gate (the network grants no privileges: ZTA).
+   - `key_config` (optional): client configuration — the TLS/JA3 fingerprint, `conf:<ja3>`. If omitted the server substitutes `conf:guest`, so **the config node is always present**.
+   - `key_dst`: resource URI.
+   - Timestamp (e.g. Unix epoch).
+   - `features`: edge message of **`msg_dim` floats** (currently **7**, see
+     `TGNConfig.msg_dim`; `/infer` rejects a different length with 422):
+     `[ja3, s1, s2, s3, method, role, clearance]`.
+     Only fields available **at decision time**: no response field (neither the HTTP
+     status nor the response volume `bytes_out`, which earlier schemas carried at
+     index 8 — see the docstring of `stream_synthetic`). The request volume `bytes_in`
+     was dropped as well, and so was the user's inter-request gap: the model reads each
+     entity's recency from its own memory and the `timestamp`. The server computes none
+     of these values: the orchestrator builds all of them. A checkpoint keeps the
+     `msg_dim` it was trained with (`/health` reports it): artifacts trained on the
+     intermediate schemas expect 8 to 11 floats.
+   - **Entity static attributes** (`user_feat` / `device_feat` / `dst_feat`, len ==
+     `node_feat_dim` = 16): role, clearance, device tier. The orchestrator/OPA already
+     knows them for every request, so they are passed per-event (no extra datastore).
+     They are the signal that lets the model detect **policy violations** — anomalies
+     whose edge features are identical to benign traffic. Because training happens on
+     synthetic data, production users will all be "new": it is **mandatory** to pass these
+     features so the model knows the privileges of the real user just met. *There is no
+     `src_feat` field*: earlier revisions of this document mentioned it, but the API never
+     had it.
+
+2. **`NodeRegistry` handling**
+   On arrival of a tuple, the TGN uses its `NodeRegistry` to map alphanumeric keys (e.g. a
+   never-seen IP address) to integer indices in real time. The system supports the entry of
+   nodes unseen during training (dynamic and unbounded node space).
+
+3. **TGN memory and neighbourhood integration**
+   The model accesses the historical state of the involved nodes by reading its internal
+   tensors: the recurrent memory (`model.memory`) **and** the recent temporal neighbourhood
+   (`model.neighbor_loader`). It concatenates the memory with the hashed node identity
+   (**Hashed Identity**), runs the multi-hop GNN over the real neighbours and combines the
+   *feature head* (policy/contextual) with the *structural head* (lateral movement). The
+   anomaly score (`1 − P(benign)`, from `0.0` to `1.0`) is computed and returned to the
+   orchestrator, which will pass it to OPA.
+
+4. **"Anti-Poisoning" update (OPA gatekeeper)**
+   For OPA to be the true final decider, the Orchestrator drives the model primitives in two
+   steps (instead of `score_event`'s internal gate):
+   - It calls **`infer_score`** to obtain the anomaly score (read-only operation with respect
+     to the baseline: it mutates neither memory nor neighbourhood). The only side effect is
+     that the `/infer` endpoint admits never-seen keys in the `NodeRegistry` (slot allocation,
+     bookkeeping to be able to score): it is not learning, and the baseline (memory +
+     neighbourhood) stays intact even for events later DENYed. The slot admission is declared
+     in the endpoint table below (`no (admission only)`).
+   - It sends the request and the score to OPA.
+   - If **OPA answers ALLOW** (the event is fully legitimate and not anomalous), the
+     Orchestrator calls **`update_memory`**, which advances the TGN memory **and** inserts
+     the edge into the neighbour loader.
+   - If **OPA answers DENY**, the orchestrator omits `update_memory`. This protects the
+     baseline against poisoning on denied requests, ensuring that the recurrent state and
+     temporal neighbor history record only policy-admitted events. The orchestrator calls
+     **`/deny`** instead, which records the event's kill-chain alarm (if present) without
+     updating memory or neighbor buffers.
+
+   > Note: `infer_score` / `update_memory` work on slot indices already mapped by the
+   > `NodeRegistry`; the per-event static attributes must be written into the slot before
+   > scoring (that is what `score_event` does internally).
+
+### Persistence
+
+The only storage required for this AI layer is the filesystem. The model save command
+(`save_model`) serializes the entire state to disk:
+- The trained network weights (including the node identity and the two scoring heads).
+- The in-memory tensors with the access histories (TGN Memory) + the raw-message store.
+- The neighbour loader buffers (the last `K` temporal neighbours per node).
+- The NodeRegistry dictionary.
+
+This file (`public/tgn_checkpoint.pt`) together with the metadata (`public/tgn_stats.json`)
+lets the AI microservice restart exactly from where it was interrupted without losing the
+users' historical context.
+
+## HTTP API (inference service)
+
+The primitives described above are exposed as a **REST/JSON microservice** by
+`../../src/serve_api.py` (FastAPI + uvicorn), started with `python -m graphagate.serve_api`
+(Docker Compose profile `serve-tgn`; container port `8088`, exposed on the host as
+`8888`). The Go orchestrator talks to it with
+`net/http` + `encoding/json` — no `.proto`/gRPC to maintain.
+
+### Starting the service
+
+**Prerequisite**: the service loads the artifacts `public/tgn_checkpoint.pt` and
+`public/tgn_stats.json`. They must be produced **first**, once, by the training
+(`docker compose --profile training-tgn up`; the artifacts are **generated** by the
+training, gitignored). Without them the service does not start.
+
+Start as a service (long-running):
+
+```bash
+# Via Docker Compose (dedicated profile, exposes :8888 on the host and the healthcheck on /health)
+docker compose --profile serve-tgn up
+
+# Or standalone, reusing the same image
+docker run --rm --gpus all -p 8888:8088 \
+  -v "$PWD/public:/app/public" graphagate graphagate.serve_api
+```
+
+The service is ready when `GET /health` answers `200` with
+`{"status":"ok","model_loaded":true,...}`. **While the checkpoint is loading it answers
+`503`** (body `{"status":"loading",...}`): the readiness gate — and the Compose
+healthcheck — treat the 503 as "not ready yet", so depending on
+`condition: service_healthy` from the orchestrator side guarantees the startup order
+without a race on the loading.
+
+Configuration via environment variables (all optional):
+
+| Variable | Default | Role |
+|---|---|---|
+| `GRAPHAGATE_CHECKPOINT` | `public/tgn_checkpoint.pt` | path of the checkpoint (weights + memory + neighbourhood) |
+| `GRAPHAGATE_STATS` | `public/tgn_stats.json` | path of the calibrated threshold + `NodeRegistry` |
+| `GRAPHAGATE_HOST` | `0.0.0.0` | bind address |
+| `GRAPHAGATE_PORT` | `8088` | bind port |
+
+### Endpoints
+
+| Method · path | Role | Mutates state? |
+|---|---|---|
+| `GET /health` | Readiness + loaded parameters (device, threshold, dimensions, registry slots) | no |
+| `POST /infer` | Computes the anomaly score **without** advancing memory/neighbourhood (only admits the entity in the registry) — *step 1* of the anti-poisoning flow | no (admission only) |
+| `POST /update` | Commits an **already approved** event (post-OPA-ALLOW): advances memory + neighbour history, records the echoed `alarm` | yes |
+| `POST /deny` | Closes a **DENYed** event: records the echoed `alarm` in the kill-chain alert state; memory, neighbourhood and counters untouched | alert state only |
+| `POST /score` | Score + internal gate + conditional update (OPA-less use / tests) | yes if benign |
+| `POST /persist` | Rewrites the evolved state to `../../public` (also automatic at shutdown) | writes to disk |
+
+### Request schema (events)
+
+`/infer`, `/update`, `/deny`, `/score` accept the same JSON body:
+
+```json
+{
+  "key_user": "alice",             // user key (string or int); "anonymous" for guests
+  "key_device": "tpm:a1b2c3",      // device key: "tpm:<id>" | "ck:<cookie>" | "ipdev:<ip>"
+  "key_source": "src:10.0.0.7",    // opt.: the client "src:<ip>" (if absent, no source→config edge)
+  "key_config": "conf:771,4865-...", // opt.: TLS/JA3 fingerprint; default "conf:guest"
+  "key_dst": "/api/v1/documents",  // resource key (normalized URI)
+  "timestamp": 1717000000,         // integer (e.g. Unix epoch)
+  "features": [1.0, 0.0, 0.0, 0.0, 0.0, 0.67, 0.5],
+                                              // edge message: len == msg_dim (7)
+                                              // [0] JA3: 1.0 (ok), 0.0 (anomaly)
+                                              // [1-3] Snort probes s1, s2, s3 (0.0 or 1.0)
+                                              // [4] HTTP method (0=GET, 1=POST, 2=PUT, 3=DELETE, 4=PATCH)
+                                              // [5] Normalized role (idx/(len-1))
+                                              // [6] Normalized clearance (idx/4)
+  "user_feat": [/* ... */],        // opt., static attributes, len == node_feat_dim (16)
+  "device_feat": [/* ... */],      // opt., same (tier in node_feat[2])
+  "dst_feat": [/* ... */],         // opt.; for preregistered resources the RISK
+                                   // (node_feat[*,4]) is already baked in the checkpoint, so
+                                   // dst_feat is NOT required in production.
+  "alarm": false                   // only /update and /deny: the `alarm` returned by the
+                                   // previous /infer, echoed back whatever OPA decided.
+                                   // It arms the kill-chain precursor. (`flagged` is a
+                                   // deprecated alias.)
+}
+```
+
+> ⚠️ There is no `src_feat` field (earlier revisions of this document showed it): the
+> correct names are `user_feat` / `device_feat` / `dst_feat`. The lengths of `features`
+> and of the `*_feat` are validated: a wrong length receives a **422**.
+
+The edge message travels on the access edge `user → resource`; the four binding edges
+(`source → config`, `config → device`, `config → user`, `device → user`)
+carry null messages and capture the relational pattern breaks (e.g. credential theft:
+never-seen IP, config and device attaching to a known user). The returned score is the
+maximum over the edges present.
+
+Response of `/infer` and `/score`:
+
+```json
+{ "anomaly_score": 0.83, "is_anomaly": true, "threshold": 0.6264, "alarm": true }
+```
+
+`alarm` is the kill-chain alarm: the event was flagged, or its score reached the precursor
+arm threshold (lower than the decision threshold: recon stays below the decision threshold
+by construction), or its Snort probe fired. The alarm arms a time-decayed prior on the
+entity's (device, else user) next scores. The trust feature (`node_feat[14]`) is never
+mutated: it stays at its training value, 1.0.
+
+### Anti-poisoning flow mapping (OPA gatekeeper)
+
+The two-step schema of the previous section is realized as follows:
+
+1. Orchestrator → `POST /infer` → obtains `anomaly_score` (read-only with respect to the
+   baseline; only admits new keys in the registry).
+2. Orchestrator → OPA with the request + score.
+3. If **ALLOW** → `POST /update` (commits into the model). If **DENY** → `POST /deny`:
+   the hostile event never enters the baseline (memory + neighbourhood); it only leaves its
+   kill-chain alarm, plus the registry slot allocated at admission, neither of which
+   modifies the model's learned state.
+
+**Invariant.** Every `/infer` must be closed by exactly one `/update` (ALLOW) or `/deny`
+(DENY), both echoing the `alarm` that `/infer` returned. The offline evaluation applies the
+alarm to every scored event whatever the commit gate decides; skipping `/deny` would leave
+the precursor unarmed exactly on the DENYed recon it exists for, and the deployed system
+would no longer be the one the reported numbers describe. A DENY is a delivery channel, not
+evidence: `/deny` without an alarm (and without a Snort probe) is a no-op. Retries are safe
+(the alert state keeps the latest alert time). Ordering: an event's `/update` or `/deny` must complete
+before the next `/infer` on the same entity — the offline replay records event *i*'s alarm
+(and commits its memory) before scoring event *i+1*.
+
+### Identity handling (new users and guests, Hashed Identity)
+
+When deployed, the model encounters previously unseen entity identifiers (users, IPs, devices).
+Through dynamic memory allocation and **Hashed Identity**, the model assigns an in-memory
+slot in real time to previously unseen identities via deterministic hash projection
+(`hash(URI) % buckets`), producing an inductive embedding baseline for newly observed nodes.
+
+For this reason, the Orchestrator must inject the privileges at runtime via `user_feat`:
+
+- **Authenticated users (new nodes)**: the Orchestrator must compute role and clearance
+  (e.g. extracted from the JWT) as float values and pass them in `user_feat`. The model
+  will write them into the just-allocated slot, and from that moment it will know how to
+  apply the correct policies for that user.
+- **Guest users (unauthenticated)**: when the request (e.g. to `/login` or public
+  endpoints) comes from an IP without a session, `key_user` will be `anonymous`, the source
+  key `src:<ip>`, and `user_feat` must be an array of zeros (`[0.0, 0.0, ...]`). This
+  corresponds to the minimum privilege level (Clearance=0, Tier=0). The model will allow
+  calls to the public routes, but will block as anomalous any attempt towards protected
+  endpoints. As soon as the user logs in, the Orchestrator starts passing their real
+  features, effectively "promoting" their privileges.
+
+### Operational constraints
+
+- **Single process/replica.** The model is a mutable in-RAM state (memory,
+  neighbourhood, registry); multiple workers/replicas would diverge and overwrite each
+  other in `/persist`. Start with a single uvicorn worker (already configured) and do
+  **not** scale this service horizontally.
+- **Key and Resource continuity.** The registry serialized by the training preregisters
+  the exact strings of the endpoint URIs (e.g. `/api/v1/personnel`,
+  `/api/v1/reactor-parameters` — the canonical list is `RESOURCE_URIS` in
+  `../../src/data/stream_synthetic.py`). The Orchestrator MUST use these exact strings as
+  `key_dst`: sub-routes with path-parameters (e.g. `/api/v1/personnel/123`) must be
+  normalized to the base route before the call (see `normalizeAIPath` in
+  services/security-orchestrator). If a different string is used, the model will interpret
+  it as a never-seen backend (falsifying the detections).
+- **Grace Period (Cold-Start break-in for users).** Because in production the
+  Orchestrator will meet completely new user/device keys (`key_user`/`key_device`), the
+  model will assign these identities a high initial anomaly score, for the lack of history
+  (cold-start). The Orchestrator **must** apply a "Grace Period" on these new entities:
+  for the very first events (e.g. the first 5-10), it must trust only OPA's static
+  validation and force the call to `/update`, ignoring the AI score. This lets the model
+  quickly build a "safe" baseline for the new user.
+
+### Example: direct call (curl)
+
+```bash
+# Read-only score of an event
+curl -s -X POST http://localhost:8888/infer \
+  -H 'Content-Type: application/json' \
+  -d '{"key_user":"alice","key_device":"tpm:a1b2c3","key_source":"src:10.0.0.7","key_config":"conf:guest","key_dst":"/api/v1/documents","timestamp":1717000000,"features":[1.0,0.0,0.0,0.0,0.0,0.67,0.5]}'
+# -> {"anomaly_score":0.83,"is_anomaly":true,"threshold":0.6264}
+```
+
+### Example: integration from the orchestrator (Go)
+
+The three-step anti-poisoning flow (`/infer` → OPA → `/update` | `/deny`) is written with the
+standard library only:
+
+```go
+type Event struct {
+    KeyUser   string    `json:"key_user"`
+    KeyDevice string    `json:"key_device"`           // "tpm:<id>" | "ck:<cookie>" | "ipdev:<ip>"
+    KeySource string    `json:"key_source,omitempty"` // the client "src:<ip>" (optional)
+    KeyConfig string    `json:"key_config,omitempty"` // "conf:<ja3>" (default "conf:guest")
+    KeyDst    string    `json:"key_dst"`
+    Timestamp int64     `json:"timestamp"`
+    Features  []float64 `json:"features"`             // len == msg_dim (7)
+    UserFeat  []float64 `json:"user_feat,omitempty"`  // len == node_feat_dim (16)
+    DeviceFeat []float64 `json:"device_feat,omitempty"`
+    DstFeat   []float64 `json:"dst_feat,omitempty"`
+    Alarm     bool      `json:"alarm,omitempty"`      // only /update and /deny: alarm of /infer
+}
+type ScoreResp struct {
+    AnomalyScore float64 `json:"anomaly_score"`
+    IsAnomaly    bool    `json:"is_anomaly"`
+    Threshold    float64 `json:"threshold"`
+    Alarm        bool    `json:"alarm"`
+}
+
+func post(base, path string, in, out any) error {
+    b, _ := json.Marshal(in)
+    resp, err := http.Post(base+path, "application/json", bytes.NewReader(b))
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    if resp.StatusCode != http.StatusOK {
+        return fmt.Errorf("graphagate %s: status %d", path, resp.StatusCode)
+    }
+    if out != nil {
+        return json.NewDecoder(resp.Body).Decode(out)
+    }
+    return nil
+}
+
+// For every access event:
+ev := Event{KeyUser: userID, KeyDevice: deviceID, KeySource: clientIP, KeyConfig: ja3,
+    KeyDst: resURI, Timestamp: time.Now().Unix(),
+    Features: edgeSignals, UserFeat: userAttrs, DeviceFeat: devAttrs, DstFeat: dstAttrs}
+
+var s ScoreResp
+if err := post(base, "/infer", ev, &s); err != nil { /* fail-closed */ }
+
+allow := opa.Decide(req, s.AnomalyScore)   // OPA is the final decider
+ev.Alarm = s.Alarm                         // echoed on both branches: arms the precursor
+if allow {
+    _ = post(base, "/update", ev, nil)     // commits ONLY if approved
+} else {
+    _ = post(base, "/deny", ev, nil)       // alert state only, never the baseline
+}
+```
+
+> **Fail-closed**: if `/infer` does not answer (timeout, service not ready), treat
+> the event as suspicious at the policy level instead of letting it pass.

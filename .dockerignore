@@ -1,0 +1,10 @@
+.venv/
+.git/
+**/__pycache__/
+*.pyc
+public/*.pt
+public/*.json
+docs/
+*.md
+!README.md
+.DS_Store

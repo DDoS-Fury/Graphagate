@@ -1,0 +1,44 @@
+# Override for live tests WITHOUT overwriting the clean weights.
+# serve-tgn loads and (on shutdown, lifespan save_model) RE-SAVES into the COPY ./.test_public,
+# never into ./public: this way repeating a test does NOT require re-training the model.
+# Adds the standard test-client service (with-device), absent from the base compose.
+#
+# PREREQUISITE (once, and to restart from clean weights): copy the artifacts to ./.test_public
+#   cp -r public .test_public
+#
+# Standard test (with-device):
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml --profile serve-tgn \
+#       --profile test-client up --abort-on-container-exit --no-build
+# No-device test (ablation):
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml --profile serve-tgn \
+#       --profile ablation-no-device up --abort-on-container-exit --no-build
+services:
+  serve-tgn:
+    volumes:
+      - ./.test_public:/app/public
+      - ./src:/app/src
+
+  # standard test client (full source->device->user->dst stream)
+  test-client:
+    profiles: ["test-client"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: graphagate
+    container_name: graphagate-test-client
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - ./.test_public:/app/public
+      - ./src:/app/src
+      - ./tests:/app/tests
+    entrypoint: ["python"]
+    command: ["/app/tests/stream_client.py", "--host", "serve-tgn", "--port", "8088", "--duration", "120"]
+    depends_on:
+      serve-tgn:
+        condition: service_healthy
