@@ -132,8 +132,8 @@ class ZTATemporalGraphNetwork(nn.Module):
         # cannot override it.
         self.delta_t_cap = _Cfg.delta_t_cap
 
-        # Ablation switches (runtime only; the full model keeps them on).
-        self.use_struct_head = True
+        # Ablation switches (runtime only; defaults follow TGNConfig).
+        self.use_struct_head = _Cfg.use_struct_head
         self.use_hash_identity = True
         self.use_hist_feats = True
         self.use_precursor = True

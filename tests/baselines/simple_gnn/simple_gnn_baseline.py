@@ -72,13 +72,14 @@ def _score_events(model, z, src, dst, msg, hist, device, precursor_fac=None):
     return out
 
 
-def run(cfg: TGNConfig = TGNConfig()):
+def run(cfg: TGNConfig = TGNConfig(), stream=None):
     torch.manual_seed(cfg.seed)
     np.random.seed(cfg.seed)
     random.seed(cfg.seed)
 
-    print("Generating synthetic streaming data (TGN params)...")
-    stream = generate_streaming_data(**stream_kwargs_from_cfg(cfg))
+    if stream is None:
+        print("Generating synthetic streaming data (TGN params)...")
+        stream = generate_streaming_data(**stream_kwargs_from_cfg(cfg))
     # Tabular actor = the DEVICE node (hardware id), the v2 analogue of the old
     # IP-keyed src; the access target stays the resource.
     src, dst, t, msg, y, types, node_features = (
@@ -89,21 +90,22 @@ def run(cfg: TGNConfig = TGNConfig()):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    # Causal interaction-history features (same tabular information as the TGN) +
-    # kill-chain precursor prior: given to the baseline so the comparison isolates
-    # the temporal dynamics alone.
-    hist_all = torch.tensor(
-        causal_hist_features(src.numpy(), dst.numpy(), y.numpy()), dtype=torch.float
-    )
-    precursor_fac = causal_precursor_factor(
-        src.numpy(), t.numpy(), msg.numpy(), cfg.precursor_half_life, cfg.precursor_max_boost
-    )
-
     # Chronological split identical to the TGN (the stream is already time-sorted).
     n = len(src)
     n_train = int(n * cfg.train_frac)
     n_val = int(n * cfg.val_frac)
     train_end, val_end = n_train, n_train + n_val
+
+    # Causal interaction-history features (same tabular information as the TGN) +
+    # kill-chain precursor prior: given to the baseline so the comparison isolates
+    # the temporal dynamics alone. Labels are available only up to val_end.
+    hist_all = torch.tensor(
+        causal_hist_features(src.numpy(), dst.numpy(), y.numpy(), label_horizon=val_end),
+        dtype=torch.float,
+    )
+    precursor_fac = causal_precursor_factor(
+        src.numpy(), t.numpy(), msg.numpy(), cfg.precursor_half_life, cfg.precursor_max_boost
+    )
 
     # --- STATIC GRAPH from the benign train events only ----------------------
     # A single aggregated, immutable graph: the edges are the benign interactions

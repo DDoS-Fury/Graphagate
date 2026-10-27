@@ -78,8 +78,8 @@ from graphagate.eval_common import tail_stream
 from graphagate.report_metrics import dump_json, fmt_ms, latex_cell, mean_std, paired_delta
 from graphagate.train_tgn import stream_to_data, train_tgn
 
-SEEDS = list(range(1000, 1010))        # fresh: the generator v5 was tuned against 1-9/42/7/123
-BUDGET_SEEDS = SEEDS[:5]
+SEEDS = list(range(1000, 1005))        # 5 fresh seeds (1000-1004); generator v5 was tuned against 1-9/42/7/123
+BUDGET_SEEDS = SEEDS                   # same 5 seeds for Panel C
 BUDGETS = [10_000, 25_000, 50_000, 100_000]  # the full budget (140k) is Panel A's run
 NON_INFERIORITY_MARGIN = 0.02           # AUC, pre-registered (tasks/todo.md)
 TESTS_DIR = Path(__file__).resolve().parent
@@ -105,20 +105,20 @@ BASELINES = {
                 "isolation_forest_baseline", "Isolation Forest"),
     "iforest_noprec": ("baselines/isolation_forest/isolation_forest_baseline.py",
                        "isolation_forest_no_precursor_baseline", "Isolation Forest (no precursor)"),
+    "ocsvm": ("baselines/ocsvm/ocsvm_baseline.py", "ocsvm_baseline", "One-Class SVM"),
+    "ocsvm_noprec": ("baselines/ocsvm/ocsvm_baseline.py",
+                     "ocsvm_no_precursor_baseline", "One-Class SVM (no precursor)"),
     "lookup_rules": ("baselines/lookup_rules/lookup_rules_baseline.py",
                      "lookup_rules_baseline", "Stateful rules"),
     "lookup_rules_val": ("baselines/lookup_rules/lookup_rules_baseline.py",
                          "lookup_rules_val_baseline", "Stateful rules (+val labels)"),
     "lookup_rules_all": ("baselines/lookup_rules/lookup_rules_baseline.py",
                          "lookup_rules_all_baseline", "Stateful rules (no labels)"),
-    # Legacy baselines: NOT run by default. ocsvm / xgboost / gnn still build their history
-    # counters from test labels (see tests/baselines/README.md) — do not cite their numbers.
     "tgn_2node": ("baselines/tgn_2node/tgn_2node_baseline.py", "tgn_2node_baseline", "TGN Vanilla (2 nodi)"),
     "gnn": ("baselines/simple_gnn/simple_gnn_baseline.py", "run", "GNN non temp."),
-    "ocsvm": ("baselines/ocsvm/ocsvm_baseline.py", "ocsvm_baseline", "One-Class SVM"),
     "xgboost": ("baselines/xgboost/xgboost_baseline.py", "xgboost_baseline", "XGBoost (sup.)"),
 }
-LEAN_BASELINES = ["iforest", "iforest_noprec", "lookup_rules", "lookup_rules_val", "lookup_rules_all"]
+LEAN_BASELINES = ["iforest_noprec", "ocsvm_noprec", "gnn", "tgn_2node"]
 BUDGET_BASELINES = ["iforest", "lookup_rules"]   # Panel C: the primary comparators only
 
 
@@ -150,51 +150,58 @@ def _pt(cls: str, metric: str) -> tuple:
     return ("per_type", cls, metric)
 
 
-# Panel B cells (TGN dicts): keyed by the metric the tab:v3v4 row needs.
-PANEL_B_CELLS = {
+# Full metric grid (Aggregate, Lateral, Theft, Policy, Contextual x AUC, AP, Recall @1%FPR, Recall routed).
+# The two dict kinds differ ONLY where the recall lives: the TGN's ``per_type[..]["recall"]``
+# is the ROUTED (cost-sensitive) recall, so the global-1%-FPR column reads ``recall_global``
+# for the TGN and ``recall`` for the baselines; routed recall is unavailable for baselines (NaN -> "---").
+_CLASSES = {
+    "lat": "lateral",
+    "theft": "cred-theft",
+    "policy": "policy",
+    "ctx": "contextual",
+}
+PANEL_A_TGN_CELLS = {
     "agg_auc": ("agg_auc",),
     "agg_ap": ("agg_ap",),
-    "agg_recall_routed": ("agg_recall",),          # routed (operational)
-    "lat_auc": _pt("lateral", "auc"),
-    "lat_ap": _pt("lateral", "ap"),
-    "lat_recall_routed": _pt("lateral", "recall"),
-    "lat_recall_global": ("lateral_recall_before",),  # @1% FPR global threshold
-    "theft_recall_routed": _pt("cred-theft", "recall"),
-    "policy_auc": _pt("policy", "auc"),
-    "policy_ap": _pt("policy", "ap"),
+    "agg_recall_global": ("agg_recall_global",),
+    "agg_recall_routed": ("agg_recall",),
+}
+PANEL_A_BASE_CELLS = {
+    "agg_auc": ("agg_auc",),
+    "agg_ap": ("agg_ap",),
+    "agg_recall_global": ("agg_recall",),
+    "agg_recall_routed": ("agg_recall_routed",),  # missing in baselines -> NaN -> "---"
+}
+for _short, _cls in _CLASSES.items():
+    PANEL_A_TGN_CELLS.update({
+        f"{_short}_auc": _pt(_cls, "auc"),
+        f"{_short}_ap": _pt(_cls, "ap"),
+        f"{_short}_recall_global": _pt(_cls, "recall_global"),
+        f"{_short}_recall_routed": _pt(_cls, "recall"),
+    })
+    PANEL_A_BASE_CELLS.update({
+        f"{_short}_auc": _pt(_cls, "auc"),
+        f"{_short}_ap": _pt(_cls, "ap"),
+        f"{_short}_recall_global": _pt(_cls, "recall"),
+        f"{_short}_recall_routed": _pt(_cls, "recall_routed"),  # missing in baselines -> NaN -> "---"
+    })
+
+# Panel B and Panel D cells share the full TGN metric set (plus legacy aliases kept for compatibility).
+PANEL_B_CELLS = {
+    **PANEL_A_TGN_CELLS,
     "policy_recall": _pt("policy", "recall"),
-    "ctx_auc": _pt("contextual", "auc"),
-    "ctx_ap": _pt("contextual", "ap"),
     "ctx_recall": _pt("contextual", "recall"),
     "fpr_routed": ("fpr_after",),
 }
 
-# Panel D: each component off on its own (all other flags at their ``train_tgn`` default = on).
+# Panel D: each component off on its own (all other flags at their ``train_tgn`` default).
 ABLATION_VARIANTS = {
-    "no_hist": ("history features", dict(use_hist_feats=False)),
+    "no_config": ("config node", dict(use_config_node=False)),
     "no_precursor": ("precursor prior", dict(use_precursor=False)),
-    "no_struct": ("structural head", dict(use_struct_head=False)),
+    "no_hist": ("history features", dict(use_hist_feats=False)),
     "no_hash": ("hashed identity", dict(use_hash_identity=False)),
 }
-PANEL_D_CELLS = {**PANEL_B_CELLS, "theft_auc": _pt("cred-theft", "auc"),
-                 "theft_ap": _pt("cred-theft", "ap"),
-                 "theft_recall_routed": _pt("cred-theft", "recall"),
-                 "theft_recall_global": _pt("cred-theft", "recall_global")}
-
-# Panel A cells. The two dict kinds differ ONLY where the recall lives: the TGN's
-# ``per_type[..]["recall"]`` is the ROUTED (cost-sensitive) recall, so the global-1%-FPR
-# column reads ``recall_global`` for the TGN and ``recall`` for the baselines — mixing the
-# two is what made an earlier Panel A compare unlike operating points.
-_CLASSES = {"lat": "lateral", "theft": "cred-theft"}
-PANEL_A_TGN_CELLS = {"agg_auc": ("agg_auc",), "agg_ap": ("agg_ap",),
-                     "agg_recall_global": ("agg_recall_global",)}
-PANEL_A_BASE_CELLS = {"agg_auc": ("agg_auc",), "agg_ap": ("agg_ap",),
-                      "agg_recall_global": ("agg_recall",)}
-for _short, _cls in _CLASSES.items():
-    PANEL_A_TGN_CELLS.update({f"{_short}_auc": _pt(_cls, "auc"), f"{_short}_ap": _pt(_cls, "ap"),
-                              f"{_short}_recall_global": _pt(_cls, "recall_global")})
-    PANEL_A_BASE_CELLS.update({f"{_short}_auc": _pt(_cls, "auc"), f"{_short}_ap": _pt(_cls, "ap"),
-                               f"{_short}_recall_global": _pt(_cls, "recall")})
+PANEL_D_CELLS = dict(PANEL_B_CELLS)
 
 # Panel C cells: identical paths for every method (AUC / AP live at the same place), plus
 # the cost axis (TGN: gradient-loop seconds; baselines: whole-call seconds).
@@ -357,6 +364,7 @@ def run_panel_d(seeds, variants, ov, fresh=False) -> dict:
     raw = {"full": full_raw}
     for name in variants:
         label, flags = ABLATION_VARIANTS[name]
+        call_flags = {"use_config_node": True, **flags}
         raw[name] = []
         for seed in seeds:
             cfg = _cfg(seed, ov)
@@ -364,7 +372,7 @@ def run_panel_d(seeds, variants, ov, fresh=False) -> dict:
             print(f"=== PANEL D: {label} OFF | seed={seed} | {cfg.num_events} ev / {cfg.epochs} ep ===")
             print("=" * 80, flush=True)
             raw[name].append(_cached(f"D_{name}", seed, ov,
-                                     lambda: train_tgn(cfg, save=False, use_config_node=True, **flags),
+                                     lambda cf=call_flags: train_tgn(cfg, save=False, **cf),
                                      fresh=fresh))
     summary = {name: _summarise(runs, PANEL_D_CELLS) for name, runs in raw.items()}
     paired = {name: {c: paired_delta(summary["full"][c]["vals"], summary[name][c]["vals"])
@@ -510,23 +518,33 @@ def _delta(a: dict, b: dict, key: str) -> str:
     return f"${res['mean_delta']:+.3f}${sig}"
 
 
+TABLE_METRIC_ROWS = [
+    ("Aggregate AUC", "agg_auc"),
+    ("Aggregate AP", "agg_ap"),
+    ("Aggregate recall (@1\\%FPR)", "agg_recall_global"),
+    ("Aggregate recall (routed)", "agg_recall_routed"),
+    ("Lateral --- AUC", "lat_auc"),
+    ("Lateral --- AP", "lat_ap"),
+    ("Lateral --- recall (@1\\%FPR)", "lat_recall_global"),
+    ("Lateral --- recall (routed)", "lat_recall_routed"),
+    ("Theft --- AUC", "theft_auc"),
+    ("Theft --- AP", "theft_ap"),
+    ("Theft --- recall (@1\\%FPR)", "theft_recall_global"),
+    ("Theft --- recall (routed)", "theft_recall_routed"),
+    ("Policy --- AUC", "policy_auc"),
+    ("Policy --- AP", "policy_ap"),
+    ("Policy --- recall (@1\\%FPR)", "policy_recall_global"),
+    ("Policy --- recall (routed)", "policy_recall_routed"),
+    ("Contextual --- AUC", "ctx_auc"),
+    ("Contextual --- AP", "ctx_ap"),
+    ("Contextual --- recall (@1\\%FPR)", "ctx_recall_global"),
+    ("Contextual --- recall (routed)", "ctx_recall_routed"),
+]
+
+
 def _emit_panel_b_tex(summary: dict):
     v4, v3 = summary["v4"], summary["v3"]
-    rows = [
-        ("Aggregate AUC", "agg_auc"),
-        ("Aggregate AP", "agg_ap"),
-        ("Aggregate recall (routed)", "agg_recall_routed"),
-        ("Lateral --- AUC", "lat_auc"),
-        ("Lateral --- AP", "lat_ap"),
-        ("Lateral --- recall (routed)", "lat_recall_routed"),
-        ("Lateral --- recall (@1\\%FPR)", "lat_recall_global"),
-        ("Theft --- recall (routed)", "theft_recall_routed"),
-        ("Policy --- AUC", "policy_auc"),
-        ("Policy --- AP", "policy_ap"),
-        ("Contextual --- AUC", "ctx_auc"),
-        ("Contextual --- AP", "ctx_ap"),
-        ("Benign FPR (routed)", "fpr_routed"),
-    ]
+    rows = TABLE_METRIC_ROWS
     lines = ["% Generated by tests/regen_report_tables.py — do NOT edit by hand.",
              "% Numeric source: tasks/runs/panelB.json",
              "% Columns: Metric & config node off & config node on & $\\Delta$ (on-off)"]
@@ -539,16 +557,7 @@ def _emit_panel_b_tex(summary: dict):
 
 
 def _emit_panel_d_tex(summary: dict, paired: dict, variants: list[str]):
-    rows = [
-        ("Aggregate AUC", "agg_auc"),
-        ("Aggregate AP", "agg_ap"),
-        ("Lateral --- AUC", "lat_auc"),
-        ("Lateral --- AP", "lat_ap"),
-        ("Lateral --- recall (@1\\%FPR)", "lat_recall_global"),
-        ("Theft --- AUC", "theft_auc"),
-        ("Theft --- recall (routed)", "theft_recall_routed"),
-        ("Benign FPR (routed)", "fpr_routed"),
-    ]
+    rows = TABLE_METRIC_ROWS
     cols = ["full"] + list(variants)
     head = ["% Generated by tests/regen_report_tables.py — do NOT edit by hand.",
             "% Numeric source: tasks/runs/panelD.json",
@@ -582,16 +591,7 @@ def _emit_panel_d_tex(summary: dict, paired: dict, variants: list[str]):
 
 def _emit_panel_a_tex(tgn: dict, base_summary: dict):
     # Columns of tab:baselines are MODELS; rows are METRICS.
-    metric_rows = [
-        ("Aggregate AUC", "agg_auc"),
-        ("Aggregate AP", "agg_ap"),
-        ("Lateral --- AUC", "lat_auc"),
-        ("Lateral --- AP", "lat_ap"),
-        ("Lateral --- recall @1\\%FPR", "lat_recall_global"),
-        ("Theft --- AUC", "theft_auc"),
-        ("Theft --- AP", "theft_ap"),
-        ("Theft --- recall @1\\%FPR", "theft_recall_global"),
-    ]
+    metric_rows = TABLE_METRIC_ROWS
     models = [("TGN", tgn)] + [(BASELINES[k][2], base_summary[k]) for k in base_summary]
     lines = ["% Generated by tests/regen_report_tables.py — do NOT edit by hand.",
              "% Numeric source: tasks/runs/panelA.json",

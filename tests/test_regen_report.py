@@ -211,13 +211,13 @@ def test_panel_d_toggles_one_component_per_arm_and_reuses_the_full_run(tmp_path,
         return fake_run(0.7)
 
     monkeypatch.setattr(rr, "train_tgn", fake_train)
-    out = rr.run_panel_d(seeds, ["no_precursor", "no_struct"], ov)
+    out = rr.run_panel_d(seeds, ["no_config", "no_precursor"], ov)
 
     assert len(seen) == 6                                    # 2 variants x 3 seeds, no "full" retrain
-    assert all(f["use_config_node"] for f in seen)
-    assert {k for f in seen for k, v in f.items() if v is False and k != "save"} == {"use_precursor", "use_struct_head"}
+    assert {k for f in seen for k, v in f.items() if v is False and k != "save"} == {"use_config_node", "use_precursor"}
     assert out["summary"]["full"]["lat_auc"]["vals"] == pytest.approx([0.9, 0.91, 0.92])
-    assert out["paired_full_minus_variant"]["no_struct"]["lat_auc"]["significant"]
+    assert out["paired_full_minus_variant"]["no_config"]["lat_auc"]["significant"]
     gen = tmp_path / "generated"
     assert "no precursor prior" in (gen / "tab_ablation.tex").read_text()
-    assert (gen / "tab_ablation_paired.tex").read_text().count("\\\\") == 8
+    assert "no config node" in (gen / "tab_ablation.tex").read_text()
+    assert (gen / "tab_ablation_paired.tex").read_text().count("\\\\") == 20

@@ -658,9 +658,11 @@ def train_tgn(cfg: TGNConfig | None = None, *, dataset: "StreamData | None" = No
     model.precursor_half_life = cfg.precursor_half_life
     model.precursor_max_shift = cfg.precursor_max_shift
     model.edge_combine = cfg.edge_combine
-    if not (use_struct_head and use_hash_identity and use_hist_feats and use_precursor):
+    if (use_struct_head != cfg.use_struct_head
+            or not (use_hash_identity and use_hist_feats and use_precursor and use_config_node)):
         print(f"[ablation] use_struct_head={use_struct_head} use_hash_identity={use_hash_identity} "
-              f"use_hist_feats={use_hist_feats} use_precursor={use_precursor}")
+              f"use_hist_feats={use_hist_feats} use_precursor={use_precursor} "
+              f"use_config_node={use_config_node}")
 
     optimizer = AdamW(model.parameters(), lr=cfg.learning_rate)
     scheduler = CosineAnnealingLR(optimizer, T_max=cfg.epochs, eta_min=1e-5)

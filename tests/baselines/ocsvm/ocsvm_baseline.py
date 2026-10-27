@@ -62,12 +62,13 @@ def _build_features(msg, src, dst, node_features, y, *, label_horizon: int):
     return np.concatenate([msg_np, src_feat, dst_feat, hist], axis=1)
 
 
-def ocsvm_baseline(cfg: TGNConfig = TGNConfig(), use_precursor: bool = True):
+def ocsvm_baseline(cfg: TGNConfig = TGNConfig(), stream=None, use_precursor: bool = True):
     np.random.seed(cfg.seed)
     random.seed(cfg.seed)
 
-    print("Generating synthetic streaming data (same params as TGN)...")
-    stream = generate_streaming_data(**stream_kwargs_from_cfg(cfg))
+    if stream is None:
+        print("Generating synthetic streaming data (same params as TGN)...")
+        stream = generate_streaming_data(**stream_kwargs_from_cfg(cfg))
     # Tabular actor = the DEVICE node (hardware id), the v2 analogue of the old
     # IP-keyed src; the access target stays the resource.
     src, dst, t, msg, y, types, node_features = (
@@ -169,6 +170,11 @@ def ocsvm_baseline(cfg: TGNConfig = TGNConfig(), use_precursor: bool = True):
         "agg_precision": float(precision), "agg_recall": float(recall),
         "per_type": per_type,
     }
+
+
+def ocsvm_no_precursor_baseline(cfg: TGNConfig = TGNConfig(), stream=None):
+    """One-Class SVM alone: same features, fit and protocol, scores without the precursor factor."""
+    return ocsvm_baseline(cfg, stream=stream, use_precursor=False)
 
 
 def main():

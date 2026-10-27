@@ -42,9 +42,9 @@ ABLATION_EPOCHS = 12
 
 VARIANTS = [
     ("full",            dict()),
-    ("no hist feats",   dict(use_hist_feats=False)),
+    ("no config node",  dict(use_config_node=False)),
     ("no precursor",    dict(use_precursor=False)),
-    ("no struct head",  dict(use_struct_head=False)),
+    ("no hist feats",   dict(use_hist_feats=False)),
     ("no hashed id",    dict(use_hash_identity=False)),
 ]
 
