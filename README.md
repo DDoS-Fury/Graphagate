@@ -93,9 +93,9 @@ The model trains under a one-class / semi-supervised regime using policy-complia
 
 - **Loss Formulation**:
 
-  $$
-  \mathcal{L} = \mathcal{L}_{\mathrm{NCE}}^{\mathrm{access}} + \mathcal{L}_{\mathrm{pos}}^{\mathrm{access}} + \mathcal{L}_{\mathrm{ctx}} + \sum_{(v, w) \in E^{\mathrm{bind}}} \left(\mathcal{L}_{\mathrm{NCE}}^{(v,w)} + \mathcal{L}_{\mathrm{pos}}^{(v,w)}\right)
-  $$
+ ```math
+\mathcal{L} = \mathcal{L}_{\mathrm{NCE}}^{\mathrm{access}} + \mathcal{L}_{\mathrm{pos}}^{\mathrm{access}} + \mathcal{L}_{\mathrm{ctx}} + \sum_{(v, w) \in E^{\mathrm{bind}}} \left(\mathcal{L}_{\mathrm{NCE}}^{(v,w)} + \mathcal{L}_{\mathrm{pos}}^{(v,w)}\right)
+```
 
   - **InfoNCE Ranking**: Ranks the true destination against $K=5$ negative destinations (75% uniform random, 25% active batch destinations).
   - **Positive BCE Anchoring**: Prevents logit drift, anchoring nominal benign scores for quantile calibration.
