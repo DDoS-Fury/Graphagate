@@ -791,12 +791,11 @@ class ZTAStreamSimulator:
 
     def _emit(self, req: _Request, res_idx: int, method: int, ja3: float, sensors,
               etype: EventType) -> dict:
-        """Event for ``req``; policy denials by benign users remain non-anomalous."""
+        """Event for ``req``; label is 1 for every non-benign type (benign denials included)."""
         return self._event(
             source=req.source, config=req.config, device=req.device, user=req.user,
             res_idx=res_idx, feat=self._msg(ja3, sensors, method, req.role, req.clearance),
-            label=int(etype not in (EventType.BENIGN, EventType.BENIGN_DENIAL)),
-            etype=etype, scenario=req.scenario,
+            label=int(etype != EventType.BENIGN), etype=etype, scenario=req.scenario,
         )
 
     def _event(self, *, source, config, device, user, res_idx, feat, label, etype, scenario,
@@ -823,16 +822,20 @@ class ZTAStreamSimulator:
         }
 
     # --- One event step ---
+    def _attacks_enabled(self) -> bool:
+        """False inside the clean training prefix: only label-0 benign events are emitted.
+
+        step_count is one-based (event index 139999 has step_count 140000), so enabling
+        attacks strictly afterwards keeps the whole prefix free of attacks, policy
+        violations and benign denials (which carry label 1).
+        """
+        return self.attack_start_event is None or self.step_count > self.attack_start_event
+
     def step(self) -> dict:
         """Generate the next event: credential theft, benign request, or kill-chain attack."""
         self._advance_clock()
 
-        # step_count is one-based: event index 139999 has step_count 140000.
-        # Enabling attacks strictly afterwards keeps the whole training prefix clean.
-        attacks_enabled = (
-            self.attack_start_event is None
-            or self.step_count > self.attack_start_event
-        )
+        attacks_enabled = self._attacks_enabled()
 
         theft = self._maybe_theft_event() if attacks_enabled else None
         if theft is not None:
@@ -1012,7 +1015,7 @@ class ZTAStreamSimulator:
                 return event
             # No allowed action: continue as a regular request of the service account
 
-        if not is_anonymous and random.random() < _P_BENIGN_DENIAL:
+        if not is_anonymous and random.random() < _P_BENIGN_DENIAL and self._attacks_enabled():
             invalid = self._policy_violations(req.role)
             if invalid:
                 res_idx, method = self._zipf_choice(invalid, ("viol", req.role))

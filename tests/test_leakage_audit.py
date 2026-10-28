@@ -48,7 +48,10 @@ SEEDS = [42, 7, 123]
 # The audit must see the stream the model is trained on: at 40k events the rarer classes
 # fell below the per-class minimum and their checks were silently skipped.
 N_EVENTS = TGNConfig().num_events
-MIN_CLASS_EVENTS = 30          # whole stream, every class in TYPE_NAMES
+# Validation + test window, every class in TYPE_NAMES. The clean training prefix has no
+# anomalies, so the window holds them all; policy violations are the rarest (about 15-40
+# per seed), 10 is the floor at which a per-seed recall is not a single-event coin flip.
+MIN_CLASS_EVENTS = 10
 MIN_TEST_EVENTS = 100          # test window, critical classes
 # A single history lookup may not separate a critical class beyond this (per seed, paper
 # protocol gating). A regression guard, not a target: over 11 seeds the worst v5 lookup
@@ -195,7 +198,9 @@ def test_no_exact_value_fingerprint(seed):
                     continue
                 precision = float((types[hit] == type_id).mean())
                 recall = float(hit[cls].mean())
-                if precision > 0.99 and recall > 0.5:
+                # Precision must beat the class's own base rate: with a clean training prefix
+                # benign is >99% of the stream, so "precision > 0.99" alone flags the prior.
+                if precision > 0.99 and precision - float(cls.mean()) > 0.005 and recall > 0.5:
                     name = TYPE_NAMES.get(type_id, "benign")
                     violations.append(
                         f"  msg{list(combo)} == {uniq[k].tolist()} identifies {name}: "
@@ -330,15 +335,33 @@ def test_every_class_is_measurable(seed):
     """
     s = _stream(seed)
     types = s.types.numpy()
-    counts = {name: int((types == k).sum()) for k, name in TYPE_NAMES.items()}
+    cfg = TGNConfig()
+    # The clean training prefix holds no anomalies by construction, so the classes are
+    # counted where they can occur: validation + test.
+    evaluable = types[int(len(types) * cfg.train_frac):]
+    counts = {name: int((evaluable == k).sum()) for k, name in TYPE_NAMES.items()}
     thin = {n: c for n, c in counts.items() if c < MIN_CLASS_EVENTS}
     assert not thin, f"classes too rare to audit at seed {seed}: {thin}"
 
-    cfg = TGNConfig()
     test = types[int(len(types) * (cfg.train_frac + cfg.val_frac)):]
     thin = {TYPE_NAMES[k]: int((test == k).sum()) for k in CRITICAL_TYPES
             if (test == k).sum() < MIN_TEST_EVENTS}
     assert not thin, f"critical classes too rare in the test window at seed {seed}: {thin}"
+
+
+@pytest.mark.parametrize("seed", SEEDS)
+def test_training_prefix_is_only_benign_label_zero(seed):
+    """One-class guard: the chronological training window holds benign label-0 events only.
+
+    No attack, no policy violation and no benign denial (label 1) may appear before the
+    train/val boundary, or the one-class learner and its calibration see anomalies.
+    """
+    s = _stream(seed)
+    n_train = int(len(s.types) * TGNConfig().train_frac)
+    types, y = s.types.numpy()[:n_train], s.y.numpy()[:n_train]
+    assert (types == 0).all(), f"non-benign types in the training prefix at seed {seed}: " \
+                               f"{sorted(set(types[types != 0].tolist()))}"
+    assert (y == 0).all(), f"label-1 events in the training prefix at seed {seed}: {int(y.sum())}"
 
 
 def test_role_claim_matches_identity():
