@@ -96,3 +96,38 @@ def test_recycled_fresh_pool_is_an_error():
     cfg = TGNConfig(num_events=6000, seed=5, num_new_sources=8)
     with pytest.raises(RuntimeError, match="num_new_sources"):
         generate_streaming_data(**stream_kwargs_from_cfg(cfg))
+
+
+def test_cfg_user_head_negatives_corrupts_only_config_user_head(monkeypatch, tmp_path):
+    """Default ``cfg_user_head_negatives`` scores 2*K negatives (tail + head) on ``config->user``
+    while keeping tail-only ``K`` negatives on ``device->user``, ``config->device`` and
+    ``source->config``; turning it off restores ``K`` on every binding edge."""
+    class _FirstBatchDone(Exception):
+        pass
+
+    orig = ZTATemporalGraphNetwork.score
+
+    def _scored_row_counts(cfg_override):
+        counts = []
+
+        def spy(self, z, nf, h_idx, src_local, dst_local, *args, **kwargs):
+            counts.append(int(src_local.numel()))
+            return orig(self, z, nf, h_idx, src_local, dst_local, *args, **kwargs)
+
+        def stop_step(self, *args, **kwargs):
+            raise _FirstBatchDone
+
+        monkeypatch.setattr(ZTATemporalGraphNetwork, "score", spy)
+        monkeypatch.setattr(torch.optim.AdamW, "step", stop_step)
+        cfg = TGNConfig(num_events=1000, batch_size=100, epochs=1, ft_epochs=0, seed=5, **cfg_override)
+        with pytest.raises(_FirstBatchDone):
+            T.train_tgn(cfg, save=False, log_dir=str(tmp_path))
+        return cfg, counts
+
+    cfg_on, on = _scored_row_counts({"cfg_user_head_negatives": True})
+    _, off = _scored_row_counts({"cfg_user_head_negatives": False})
+    P, K = on[0], cfg_on.infonce_k
+    # Call order per batch: access (pos, neg, ctx), then 4 bindings (pos, neg_t [, neg_h]):
+    # device->user, config->user, config->device, source->config.
+    assert off == [P, P * K, P, P, P * K, P, P * K, P, P * K, P, P * K]
+    assert on == [P, P * K, P, P, P * K, P, P * K, P * K, P, P * K, P, P * K]

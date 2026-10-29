@@ -58,7 +58,9 @@ def main():
         cells = [c.strip() for c in line.removesuffix("\\\\").strip().split(" & ")]
         m = re.match(rf"({'|'.join(GROUPS)})\s*(?:---)?\s*(.*)", cells[0])
         metric = (m.group(2).replace("recall (@1\\%FPR)", "Recall@1\\%FPR")
-                  .replace("recall (routed)", "Recall (routed)"))
+                  .replace("recall (routed)", "Recall (routed)")
+                  .replace("blocked (@1\\%FPR)", "Blocked@1\\%FPR")
+                  .replace("blocked (routed)", "Blocked (routed)"))
         vals = cells[1:]
         if order:
             vals = [vals[i] for i in order]

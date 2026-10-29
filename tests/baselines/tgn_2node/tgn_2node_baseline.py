@@ -27,14 +27,14 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 
 from graphagate.config import TGNConfig
 from graphagate.data.stream_synthetic import generate_streaming_data, stream_kwargs_from_cfg
-from graphagate.eval_common import binary_metrics
+from graphagate.eval_common import binary_metrics, incident_report
 from graphagate.model.registry import NodeRegistry
 from graphagate.model.tgn import ZTATemporalGraphNetwork, stable_hash
 from graphagate.serve_tgn import anomaly_score, precursor_shift, record_alert
 from graphagate.train_tgn import train_negative_pool
 
 
-def tgn_2node_baseline(cfg: Optional[TGNConfig] = None) -> dict:
+def tgn_2node_baseline(cfg: Optional[TGNConfig] = None, stream=None) -> dict:
     """Train and evaluate the 2-node TGN baseline (User -> Resource)."""
     if cfg is None:
         cfg = TGNConfig()
@@ -43,8 +43,9 @@ def tgn_2node_baseline(cfg: Optional[TGNConfig] = None) -> dict:
     np.random.seed(cfg.seed)
     random.seed(cfg.seed)
 
-    print("Generating synthetic streaming data (TGN params)...")
-    stream = generate_streaming_data(**stream_kwargs_from_cfg(cfg))
+    if stream is None:
+        print("Generating synthetic streaming data (TGN params)...")
+        stream = generate_streaming_data(**stream_kwargs_from_cfg(cfg))
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
@@ -311,12 +312,22 @@ def tgn_2node_baseline(cfg: Optional[TGNConfig] = None) -> dict:
         }
         print(f"  {name:11s} | n={int(l_sel.sum()):4d} | AUC: {t_auc:.4f} | AP: {t_ap:.4f} | Recall@thr: {t_recall:.4f}")
 
+    incident = {}
+    if getattr(stream, "incident", None) is not None:
+        test_preds = (test_scores_np >= threshold).astype(int)
+        incident["global"] = incident_report(
+            f"global @FPR={cfg.target_fpr}", test_preds, test_scores_np, test_types,
+            stream.incident[val_end:].numpy(),
+            stream.theft_variant[val_end:].numpy(),
+        )
+
     return {
         "agg_auc": float(auc),
         "agg_ap": float(ap),
         "agg_precision": float(precision),
         "agg_recall": float(recall),
         "per_type": per_type,
+        "incident": incident,
     }
 
 

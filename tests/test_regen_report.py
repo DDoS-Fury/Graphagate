@@ -154,6 +154,13 @@ def test_cell_maps_never_mix_routed_and_global_recall():
     assert rr.PANEL_A_TGN_CELLS["theft_recall_global"] == ("per_type", "cred-theft", "recall_global")
     assert rr.PANEL_A_BASE_CELLS["lat_recall_global"] == ("per_type", "lateral", "recall")
     assert rr.PANEL_A_BASE_CELLS["theft_recall_global"] == ("per_type", "cred-theft", "recall")
+    # Incident-level blocked rate: global @1% FPR for both, routed for the TGN only.
+    assert rr.PANEL_A_TGN_CELLS["lat_blocked_global"] == ("incident", "global", "lateral", "blocked")
+    assert rr.PANEL_A_TGN_CELLS["theft_blocked_global"] == ("incident", "global", "cred-theft", "blocked")
+    assert rr.PANEL_A_TGN_CELLS["theft_blocked_routed"] == ("incident", "routed", "cred-theft", "blocked")
+    assert rr.PANEL_A_BASE_CELLS["lat_blocked_global"] == ("incident", "global", "lateral", "blocked")
+    assert rr.PANEL_A_BASE_CELLS["theft_blocked_global"] == ("incident", "global", "cred-theft", "blocked")
+    assert rr.PANEL_A_BASE_CELLS["theft_blocked_routed"] == ("incident", "routed", "cred-theft", "blocked")
 
 
 def test_cache_returns_the_json_roundtrip_and_reuses_it(tmp_path, monkeypatch):
@@ -220,4 +227,4 @@ def test_panel_d_toggles_one_component_per_arm_and_reuses_the_full_run(tmp_path,
     gen = tmp_path / "generated"
     assert "no precursor prior" in (gen / "tab_ablation.tex").read_text()
     assert "no config node" in (gen / "tab_ablation.tex").read_text()
-    assert (gen / "tab_ablation_paired.tex").read_text().count("\\\\") == 20
+    assert (gen / "tab_ablation_paired.tex").read_text().count("\\\\") == len(rr.TABLE_METRIC_ROWS)

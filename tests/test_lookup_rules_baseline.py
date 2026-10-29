@@ -135,9 +135,11 @@ def test_all_gate_uses_no_label_at_all(stream):
 
 def test_schema_is_what_the_report_consumes(stream):
     out = rules.lookup_rules_all_baseline(CFG, stream=stream)
-    assert set(out) == {"per_type"}                      # no aggregate for the rules
+    assert set(out) == {"per_type", "incident"}          # no aggregate for the rules
     for entry in out["per_type"].values():
         assert set(entry) == {"auc", "ap", "recall", "fpr", "threshold", "n"}
+    for cls in ("lateral", "cred-theft"):
+        assert 0.0 <= out["incident"]["global"][cls]["blocked"] <= 1.0
 
 
 def test_unknown_gate_is_rejected(stream):

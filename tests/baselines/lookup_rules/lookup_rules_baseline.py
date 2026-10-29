@@ -47,6 +47,7 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 from graphagate.config import TGNConfig
 from graphagate.data.lookup_rules import lookup_flags
 from graphagate.data.stream_synthetic import generate_streaming_data, stream_kwargs_from_cfg
+from graphagate.eval_common import incident_report
 
 # (type id, name) — names match ``train_tgn`` / the other baselines' ``per_type`` keys.
 RULE_CLASSES = ((3, "lateral"), (4, "cred-theft"))
@@ -112,7 +113,18 @@ def lookup_rules_baseline(cfg: TGNConfig = TGNConfig(), stream=None, gate: str =
                           "fpr": fpr, "threshold": int(k), "n": int(cls.sum())}
         print(f"  {name:10s} | n={int(cls.sum()):4d} | AUC: {t_auc:.4f} | AP: {t_ap:.4f} | "
               f"Recall@k: {t_recall:.4f}")
-    return {"per_type": per_type}
+    out = {"per_type": per_type}
+    if getattr(stream, "incident", None) is not None and test_benign.any():
+        test_scores = score[test]
+        test_preds = (test_scores >= k).astype(int)
+        out["incident"] = {
+            "global": incident_report(
+                f"k={k} (@FPR<={cfg.target_fpr})", test_preds, test_scores, types[test],
+                stream.incident[val_end:].numpy(),
+                stream.theft_variant[val_end:].numpy(),
+            )
+        }
+    return out
 
 
 def lookup_rules_val_baseline(cfg: TGNConfig = TGNConfig(), stream=None):

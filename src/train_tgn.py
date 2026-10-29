@@ -743,23 +743,31 @@ def train_tgn(cfg: TGNConfig | None = None, *, dataset: "StreamData | None" = No
         has_src = p_source is not None
         has_config = p_config is not None and data.cfg_num > 0
 
-        def _corrupt(pos, rng):
+        def _corrupt(pos, rng, *, hard_ratio=None):
+            hr = cfg.binding_hard_ratio if hard_ratio is None else hard_ratio
             return _sample_structural_negatives(
                 P * K, rng[1], rng[0], device, avoid=pos.repeat_interleave(K),
-                hard_pool=pos, hard_ratio=cfg.binding_hard_ratio, pool=rng[2],
+                hard_pool=pos, hard_ratio=hr, pool=rng[2],
             )
 
         # (head, tail, tail negatives, head negatives | None), in the loss order.
         bind_edges = []
 
-        def _bind(head, tail, h_rng, t_rng):
-            neg_h = _corrupt(head, h_rng) if cfg.head_negatives else None
+        def _bind(head, tail, h_rng, t_rng, *, corrupt_head: bool = False, head_hard_ratio=None):
+            neg_h = (
+                _corrupt(head, h_rng, hard_ratio=head_hard_ratio)
+                if (cfg.head_negatives or corrupt_head) else None
+            )
             bind_edges.append((head, tail, _corrupt(tail, t_rng), neg_h))
 
         if has_bind:
             _bind(p_device, p_user, dev_rng, usr_rng)  # device → user
         if has_config:
-            _bind(p_config, p_user, cfg_rng, usr_rng)  # config → user
+            _bind(
+                p_config, p_user, cfg_rng, usr_rng,
+                corrupt_head=cfg.cfg_user_head_negatives,
+                head_hard_ratio=(cfg.cfg_user_hard_ratio if cfg.cfg_user_head_negatives else None),
+            )  # config → user
             if has_bind:
                 _bind(p_config, p_device, cfg_rng, dev_rng)  # config → device
             if has_src:
@@ -1450,6 +1458,8 @@ def train_tgn(cfg: TGNConfig | None = None, *, dataset: "StreamData | None" = No
             "edge_calibration": cfg.edge_calibration,
             "edge_combine": cfg.edge_combine,
             "head_negatives": cfg.head_negatives,
+            "cfg_user_head_negatives": cfg.cfg_user_head_negatives,
+            "cfg_user_hard_ratio": cfg.cfg_user_hard_ratio,
             "binding_hard_ratio": cfg.binding_hard_ratio,
             "mask_seen_negatives": cfg.mask_seen_negatives,
             "precursor_arm_on_score": cfg.precursor_arm_on_score,

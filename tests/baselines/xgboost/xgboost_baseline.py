@@ -14,7 +14,12 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 
 from graphagate.config import TGNConfig
 from graphagate.data.stream_synthetic import generate_streaming_data, stream_kwargs_from_cfg
-from graphagate.eval_common import binary_metrics, causal_hist_features, causal_precursor_factor
+from graphagate.eval_common import (
+    binary_metrics,
+    causal_hist_features,
+    causal_precursor_factor,
+    incident_report,
+)
 
 def _build_features(msg, src, dst, node_features, y):
     """Per-event feature matrix for XGBoost."""
@@ -25,12 +30,13 @@ def _build_features(msg, src, dst, node_features, y):
     hist = causal_hist_features(src.numpy(), dst.numpy(), y.numpy())  # [N, 3]
     return np.concatenate([msg_np, src_feat, dst_feat, hist], axis=1)
 
-def xgboost_baseline(cfg: TGNConfig = TGNConfig()):
+def xgboost_baseline(cfg: TGNConfig = TGNConfig(), stream=None):
     np.random.seed(cfg.seed)
     random.seed(cfg.seed)
 
-    print("Generating synthetic streaming data (same params as TGN)...")
-    stream = generate_streaming_data(**stream_kwargs_from_cfg(cfg))
+    if stream is None:
+        print("Generating synthetic streaming data (same params as TGN)...")
+        stream = generate_streaming_data(**stream_kwargs_from_cfg(cfg))
     src, dst, t, msg, y, types, node_features = (
         stream.device, stream.dst, stream.t, stream.msg, stream.y, stream.types,
         stream.node_features,
@@ -139,12 +145,21 @@ def xgboost_baseline(cfg: TGNConfig = TGNConfig()):
         print(f"  {name:10s} | n={int(l_sel.sum()):4d} | AUC: {t_auc:.4f} | "
               f"AP: {t_ap:.4f} | Recall@thr: {t_recall:.4f}")
 
+    incident = {}
+    if getattr(stream, "incident", None) is not None:
+        test_preds = (test_scores >= threshold).astype(int)
+        incident["global"] = incident_report(
+            f"global @FPR={cfg.target_fpr}", test_preds, test_scores, test_types,
+            stream.incident[val_end:].numpy(),
+            stream.theft_variant[val_end:].numpy(),
+        )
+
     # Machine-readable summary (consumed by tests/regen_report_tables.py). Recall here is
     # at the global @target_fpr threshold — the apples-to-apples Panel A (tab:baselines) metric.
     return {
         "agg_auc": float(auc), "agg_ap": float(ap),
         "agg_precision": float(precision), "agg_recall": float(recall),
-        "per_type": per_type,
+        "per_type": per_type, "incident": incident,
     }
 
 def main():

@@ -86,6 +86,7 @@ def test_pipeline_passes_val_end_and_uses_the_injected_stream(monkeypatch):
     assert horizons == [int(n * cfg.train_frac) + int(n * cfg.val_frac)]
     assert 0.0 <= out["agg_auc"] <= 1.0
     assert "lateral" in out["per_type"]
+    assert 0.0 <= out["incident"]["global"]["cred-theft"]["blocked"] <= 1.0
 
 
 def test_no_precursor_variant_never_computes_the_factor(monkeypatch):

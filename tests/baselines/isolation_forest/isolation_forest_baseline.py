@@ -10,7 +10,12 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 
 from graphagate.config import TGNConfig
 from graphagate.data.stream_synthetic import generate_streaming_data, stream_kwargs_from_cfg
-from graphagate.eval_common import binary_metrics, causal_hist_features, causal_precursor_factor
+from graphagate.eval_common import (
+    binary_metrics,
+    causal_hist_features,
+    causal_precursor_factor,
+    incident_report,
+)
 
 # IF's hyperparameters
 ISOLATION_FOREST_PARAMS = {
@@ -157,12 +162,21 @@ def isolation_forest_baseline(cfg: TGNConfig = TGNConfig(), stream=None, use_pre
         print(f"  {name:10s} | n={int(l_sel.sum()):4d} | AUC: {t_auc:.4f} | "
               f"AP: {t_ap:.4f} | Recall@thr: {t_recall:.4f}")
 
+    incident = {}
+    if getattr(stream, "incident", None) is not None:
+        test_preds = (test_scores >= threshold).astype(int)
+        incident["global"] = incident_report(
+            f"global @FPR={cfg.target_fpr}", test_preds, test_scores, test_types,
+            stream.incident[calibration_end:].numpy(),
+            stream.theft_variant[calibration_end:].numpy(),
+        )
+
     # Machine-readable summary (consumed by tests/regen_report_tables.py). Recall here is
     # at the global @target_fpr threshold — the apples-to-apples Panel A (tab:baselines) metric.
     return {
         "agg_auc": float(auc), "agg_ap": float(ap),
         "agg_precision": float(precision), "agg_recall": float(recall),
-        "per_type": per_type,
+        "per_type": per_type, "incident": incident,
     }
 
 
