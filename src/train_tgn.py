@@ -1511,4 +1511,11 @@ def train_tgn(cfg: TGNConfig | None = None, *, dataset: "StreamData | None" = No
 
 
 if __name__ == "__main__":
-    train_tgn()
+    import argparse
+
+    _ap = argparse.ArgumentParser(description="Train and evaluate Graphagate streaming TGN.")
+    _ap.add_argument("--seed", type=int, default=None, help="Override TGNConfig.seed (default: 42)")
+    _ap.add_argument("--no-save", action="store_true", help="Skip overwriting public/ artifacts")
+    _args = _ap.parse_args()
+    _cfg = TGNConfig() if _args.seed is None else TGNConfig(seed=_args.seed)
+    train_tgn(_cfg, save=not _args.no_save)
