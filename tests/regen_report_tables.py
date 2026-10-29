@@ -118,7 +118,7 @@ BASELINES = {
     "gnn": ("baselines/simple_gnn/simple_gnn_baseline.py", "run", "GNN non temp."),
     "xgboost": ("baselines/xgboost/xgboost_baseline.py", "xgboost_baseline", "XGBoost (sup.)"),
 }
-LEAN_BASELINES = ["iforest_noprec", "ocsvm_noprec", "gnn", "tgn_2node"]
+LEAN_BASELINES = ["iforest", "iforest_noprec", "ocsvm_noprec", "gnn", "tgn_2node"]
 BUDGET_BASELINES = ["iforest", "lookup_rules"]   # Panel C: the primary comparators only
 
 
