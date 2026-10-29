@@ -1,446 +1,168 @@
 {
   "meta": {
     "seeds": [
-      1000,
-      1001,
-      1002,
-      1003,
-      1004
+      1000
     ],
     "num_events": 200000,
     "epochs": 15,
     "overrides": {},
-    "protocol": "Panel A (E1): TGN vs baselines, default config, global 1% FPR threshold",
+    "protocol": "component ablation, routed decision; 'full' arm = Panel A's TGN run",
     "save": false,
-    "generated": "2026-10-28T06:26:33+00:00"
+    "generated": "2026-10-29T11:41:16+00:00"
   },
-  "tgn_row": {
-    "raw": [
+  "raw": {
+    "full": [
       {
-        "threshold": 0.9998476744178815,
-        "threshold_dirty": 0.9997873446010939,
-        "threshold_clean_unsup": 0.9997670783408377,
-        "agg_auc": 0.8520315226628793,
-        "agg_ap": 0.25256721229162227,
-        "agg_precision": 0.3747016706443914,
-        "agg_recall": 0.30724070450097846,
-        "agg_recall_global": 0.3150684931506849,
-        "lateral_recall_before": 0.36486486486486486,
-        "lateral_recall_after": 0.36036036036036034,
-        "fpr_before": 0.0077743168983767635,
-        "fpr_after": 0.006634759046823166,
+        "threshold": 0.9999211331910598,
+        "threshold_dirty": 0.999999956220241,
+        "threshold_clean_unsup": 0.9997801943279224,
+        "agg_auc": 0.906803249636883,
+        "agg_ap": 0.6621509724375143,
+        "agg_precision": 0.7003676470588235,
+        "agg_recall": 0.6864864864864865,
+        "agg_recall_global": 0.7117117117117117,
+        "lateral_recall_before": 0.345,
+        "lateral_recall_after": 0.285,
+        "fpr_before": 0.01499100025713551,
+        "fpr_after": 0.008382617639496014,
         "per_type": {
           "policy": {
-            "auc": 0.9058177350050032,
-            "ap": 0.005527559032657725,
-            "recall": 0.047619047619047616,
-            "recall_global": 0.047619047619047616,
-            "n": 21
-          },
-          "contextual": {
-            "auc": 0.9820811164257178,
-            "ap": 0.20765760605109437,
-            "recall": 0.7246376811594203,
-            "recall_global": 0.7391304347826086,
-            "n": 69
-          },
-          "lateral": {
-            "auc": 0.9305968514868391,
-            "ap": 0.2078498664056285,
-            "recall": 0.36036036036036034,
-            "recall_global": 0.36486486486486486,
-            "n": 222
-          },
-          "cred-theft": {
-            "auc": 0.717919531733658,
-            "ap": 0.062338029097460494,
-            "recall": 0.1306532663316583,
-            "recall_global": 0.1407035175879397,
-            "n": 199
-          },
-          "benign-denied": {
-            "auc": 0.7051787381807533,
-            "ap": 0.03117787901934957,
-            "recall": 0.0121765601217656,
-            "recall_global": 0.0121765601217656,
-            "n": 657
-          }
-        },
-        "cold_start": {
-          "n_warmed": 222,
-          "n_cold": 0,
-          "recall_warmed": 0.36036036036036034,
-          "recall_cold": NaN,
-          "auc_warmed": 0.9305968514868391
-        },
-        "incident": {
-          "routed": {
-            "lateral": {
-              "n_incidents": 26,
-              "n_events": 222,
-              "blocked": 0.9615384615384616,
-              "served_median": 1.0,
-              "served_share": 0.18515779092702173
-            },
-            "lateral (any chain event)": {
-              "n_incidents": 26,
-              "n_events": 222,
-              "blocked": 1.0,
-              "served_median": 0.0,
-              "served_share": 0.05993589743589744
-            },
-            "cred-theft": {
-              "n_incidents": 46,
-              "n_events": 199,
-              "blocked": 0.5217391304347826,
-              "served_median": 0.0,
-              "served_share": 0.4782608695652174
-            },
-            "theft_variants": {
-              "none": {
-                "n_events": 12,
-                "auc": 0.7145760369454746,
-                "recall": 0.25,
-                "n_incidents": 3,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "replay": {
-                "n_events": 22,
-                "auc": 0.8918113458441024,
-                "recall": 0.22727272727272727,
-                "n_incidents": 5,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "mimic": {
-                "n_events": 6,
-                "auc": 0.8542010026095316,
-                "recall": 0.3333333333333333,
-                "n_incidents": 2,
-                "blocked": 0.5,
-                "served_median": 1.5,
-                "served_share": 0.5
-              },
-              "replay+mimic": {
-                "n_events": 16,
-                "auc": 0.445431602801813,
-                "recall": 0.0,
-                "n_incidents": 4,
-                "blocked": 0.0,
-                "served_median": 4.0,
-                "served_share": 1.0
-              },
-              "known-src": {
-                "n_events": 17,
-                "auc": 0.7976911098184639,
-                "recall": 0.23529411764705882,
-                "n_incidents": 4,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "replay+known-src": {
-                "n_events": 17,
-                "auc": 0.8712265808672048,
-                "recall": 0.23529411764705882,
-                "n_incidents": 4,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "mimic+known-src": {
-                "n_events": 70,
-                "auc": 0.707946686091,
-                "recall": 0.11428571428571428,
-                "n_incidents": 16,
-                "blocked": 0.4375,
-                "served_median": 3.0,
-                "served_share": 0.5625
-              },
-              "replay+mimic+known-src": {
-                "n_events": 39,
-                "auc": 0.6279806239633186,
-                "recall": 0.0,
-                "n_incidents": 8,
-                "blocked": 0.0,
-                "served_median": 5.5,
-                "served_share": 1.0
-              }
-            }
-          },
-          "global": {
-            "lateral": {
-              "n_incidents": 26,
-              "n_events": 222,
-              "blocked": 0.9615384615384616,
-              "served_median": 1.0,
-              "served_share": 0.1736193293885602
-            },
-            "lateral (any chain event)": {
-              "n_incidents": 26,
-              "n_events": 222,
-              "blocked": 1.0,
-              "served_median": 0.0,
-              "served_share": 0.05993589743589744
-            },
-            "cred-theft": {
-              "n_incidents": 46,
-              "n_events": 199,
-              "blocked": 0.5652173913043478,
-              "served_median": 0.0,
-              "served_share": 0.43478260869565216
-            },
-            "theft_variants": {
-              "none": {
-                "n_events": 12,
-                "auc": 0.7145760369454746,
-                "recall": 0.25,
-                "n_incidents": 3,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "replay": {
-                "n_events": 22,
-                "auc": 0.8918113458441024,
-                "recall": 0.22727272727272727,
-                "n_incidents": 5,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "mimic": {
-                "n_events": 6,
-                "auc": 0.8542010026095316,
-                "recall": 0.3333333333333333,
-                "n_incidents": 2,
-                "blocked": 0.5,
-                "served_median": 1.5,
-                "served_share": 0.5
-              },
-              "replay+mimic": {
-                "n_events": 16,
-                "auc": 0.445431602801813,
-                "recall": 0.0,
-                "n_incidents": 4,
-                "blocked": 0.0,
-                "served_median": 4.0,
-                "served_share": 1.0
-              },
-              "known-src": {
-                "n_events": 17,
-                "auc": 0.7976911098184639,
-                "recall": 0.23529411764705882,
-                "n_incidents": 4,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "replay+known-src": {
-                "n_events": 17,
-                "auc": 0.8712265808672048,
-                "recall": 0.23529411764705882,
-                "n_incidents": 4,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "mimic+known-src": {
-                "n_events": 70,
-                "auc": 0.707946686091,
-                "recall": 0.14285714285714285,
-                "n_incidents": 16,
-                "blocked": 0.5625,
-                "served_median": 0.0,
-                "served_share": 0.4375
-              },
-              "replay+mimic+known-src": {
-                "n_events": 39,
-                "auc": 0.6279806239633186,
-                "recall": 0.0,
-                "n_incidents": 8,
-                "blocked": 0.0,
-                "served_median": 5.5,
-                "served_share": 1.0
-              }
-            }
-          }
-        },
-        "scenario": {
-          "fpr_plain": 0.005433887699654207,
-          "fpr_roaming": 0.010281385281385282,
-          "fpr_wiped": 0.006097560975609756,
-          "n_roaming": 3696,
-          "n_wiped": 656,
-          "fpr_new_user": 0.009708737864077669,
-          "n_new_user": 103,
-          "theft_recall": 0.1306532663316583,
-          "theft_auc": 0.717919531733658,
-          "n_theft": 199,
-          "shared_lateral_recall": 0.32142857142857145,
-          "n_shared_lateral": 84
-        },
-        "train_seconds": 787.8159639099995,
-        "use_struct_head": false,
-        "use_hash_identity": true,
-        "use_hist_feats": true,
-        "use_precursor": true,
-        "use_config_node": true
-      },
-      {
-        "threshold": 0.9999705519231852,
-        "threshold_dirty": 0.9999238131721397,
-        "threshold_clean_unsup": 0.9997005465966338,
-        "agg_auc": 0.7769599419981754,
-        "agg_ap": 0.21892005100095796,
-        "agg_precision": 0.47058823529411764,
-        "agg_recall": 0.20734341252699784,
-        "agg_recall_global": 0.2613390928725702,
-        "lateral_recall_before": 0.35789473684210527,
-        "lateral_recall_after": 0.30526315789473685,
-        "fpr_before": 0.00667728962743759,
-        "fpr_after": 0.0027316184839517414,
-        "per_type": {
-          "policy": {
-            "auc": 0.9273484243688463,
-            "ap": 0.0042056269161202696,
-            "recall": 0.0,
-            "recall_global": 0.0,
+            "auc": 0.9986251821376532,
+            "ap": 0.38069133775926356,
+            "recall": 0.9333333333333333,
+            "recall_global": 1.0,
             "n": 15
           },
           "contextual": {
-            "auc": 0.916548073983919,
-            "ap": 0.18735415144576203,
-            "recall": 0.6304347826086957,
-            "recall_global": 0.7608695652173914,
-            "n": 46
+            "auc": 0.9364917270585271,
+            "ap": 0.23686120388927095,
+            "recall": 0.7755102040816326,
+            "recall_global": 0.8775510204081632,
+            "n": 49
           },
           "lateral": {
-            "auc": 0.8955233813461573,
-            "ap": 0.28725946081493126,
-            "recall": 0.30526315789473685,
-            "recall_global": 0.35789473684210527,
-            "n": 190
+            "auc": 0.8570905116996657,
+            "ap": 0.07939699332675061,
+            "recall": 0.285,
+            "recall_global": 0.345,
+            "n": 200
           },
           "cred-theft": {
-            "auc": 0.6352489962551802,
-            "ap": 0.022501215893004987,
-            "recall": 0.04245283018867924,
-            "recall_global": 0.08490566037735849,
-            "n": 212
+            "auc": 0.6049897902076746,
+            "ap": 0.009292323223109432,
+            "recall": 0.06470588235294118,
+            "recall_global": 0.09411764705882353,
+            "n": 170
           },
           "benign-denied": {
-            "auc": 0.7184532042424269,
-            "ap": 0.033270063916287625,
-            "recall": 0.007082152974504249,
-            "recall_global": 0.009915014164305949,
-            "n": 706
+            "auc": 0.9932215503901918,
+            "ap": 0.8384272533943399,
+            "recall": 0.9497041420118343,
+            "recall_global": 0.9571005917159763,
+            "n": 676
           }
         },
         "cold_start": {
-          "n_warmed": 190,
+          "n_warmed": 200,
           "n_cold": 0,
-          "recall_warmed": 0.30526315789473685,
+          "recall_warmed": 0.285,
           "recall_cold": NaN,
-          "auc_warmed": 0.8955233813461573
+          "auc_warmed": 0.8570905116996657
         },
         "incident": {
           "routed": {
             "lateral": {
               "n_incidents": 23,
-              "n_events": 190,
-              "blocked": 0.8260869565217391,
-              "served_median": 2.0,
-              "served_share": 0.3159075224292616
+              "n_events": 200,
+              "blocked": 0.9130434782608695,
+              "served_median": 1.0,
+              "served_share": 0.2687190828495177
             },
             "lateral (any chain event)": {
               "n_incidents": 23,
-              "n_events": 190,
-              "blocked": 1.0,
+              "n_events": 200,
+              "blocked": 0.9565217391304348,
               "served_median": 0.0,
-              "served_share": 0.13692201518288474
+              "served_share": 0.10567632850241546
             },
             "cred-theft": {
-              "n_incidents": 45,
-              "n_events": 212,
-              "blocked": 0.17777777777777778,
-              "served_median": 5.0,
-              "served_share": 0.8222222222222222
+              "n_incidents": 39,
+              "n_events": 170,
+              "blocked": 0.28205128205128205,
+              "served_median": 3.0,
+              "served_share": 0.717948717948718
             },
             "theft_variants": {
               "none": {
-                "n_events": 9,
-                "auc": 0.7430203245402442,
-                "recall": 0.2222222222222222,
-                "n_incidents": 2,
+                "n_events": 3,
+                "auc": 0.5966400959972572,
+                "recall": 0.3333333333333333,
+                "n_incidents": 1,
                 "blocked": 1.0,
                 "served_median": 0.0,
                 "served_share": 0.0
               },
               "replay": {
-                "n_events": 20,
-                "auc": 0.6922742139012644,
-                "recall": 0.2,
-                "n_incidents": 4,
-                "blocked": 0.75,
-                "served_median": 0.0,
-                "served_share": 0.25
+                "n_events": 4,
+                "auc": 0.438731036256107,
+                "recall": 0.0,
+                "n_incidents": 1,
+                "blocked": 0.0,
+                "served_median": 4.0,
+                "served_share": 1.0
               },
               "mimic": {
-                "n_events": 19,
-                "auc": 0.6419206575321671,
+                "n_events": 17,
+                "auc": 0.5238697381755479,
                 "recall": 0.0,
                 "n_incidents": 4,
                 "blocked": 0.0,
-                "served_median": 4.5,
+                "served_median": 4.0,
                 "served_share": 1.0
               },
               "replay+mimic": {
-                "n_events": 27,
-                "auc": 0.5943332789666904,
-                "recall": 0.0,
-                "n_incidents": 6,
-                "blocked": 0.0,
-                "served_median": 5.0,
-                "served_share": 1.0
-              },
-              "known-src": {
-                "n_events": 10,
-                "auc": 0.5267363704256909,
-                "recall": 0.1,
-                "n_incidents": 2,
-                "blocked": 0.5,
-                "served_median": 3.0,
-                "served_share": 0.5
-              },
-              "replay+known-src": {
                 "n_events": 9,
-                "auc": 0.4277338552531053,
+                "auc": 0.4595182994771578,
                 "recall": 0.0,
                 "n_incidents": 2,
                 "blocked": 0.0,
                 "served_median": 4.5,
                 "served_share": 1.0
               },
+              "known-src": {
+                "n_events": 31,
+                "auc": 0.5813493808011014,
+                "recall": 0.0967741935483871,
+                "n_incidents": 6,
+                "blocked": 0.5,
+                "served_median": 1.5,
+                "served_share": 0.5
+              },
+              "replay+known-src": {
+                "n_events": 19,
+                "auc": 0.49945054201458905,
+                "recall": 0.05263157894736842,
+                "n_incidents": 5,
+                "blocked": 0.2,
+                "served_median": 3.0,
+                "served_share": 0.8
+              },
               "mimic+known-src": {
-                "n_events": 59,
-                "auc": 0.676370748689781,
-                "recall": 0.03389830508474576,
-                "n_incidents": 13,
-                "blocked": 0.15384615384615385,
-                "served_median": 5.0,
-                "served_share": 0.8461538461538461
+                "n_events": 48,
+                "auc": 0.7700785334704723,
+                "recall": 0.125,
+                "n_incidents": 10,
+                "blocked": 0.6,
+                "served_median": 0.0,
+                "served_share": 0.4
               },
               "replay+mimic+known-src": {
-                "n_events": 59,
-                "auc": 0.6249794306401184,
+                "n_events": 39,
+                "auc": 0.5586361268798914,
                 "recall": 0.0,
-                "n_incidents": 12,
+                "n_incidents": 10,
                 "blocked": 0.0,
-                "served_median": 5.0,
+                "served_median": 3.5,
                 "served_share": 1.0
               }
             }
@@ -448,330 +170,235 @@
           "global": {
             "lateral": {
               "n_incidents": 23,
-              "n_events": 190,
-              "blocked": 0.8695652173913043,
-              "served_median": 1.0,
-              "served_share": 0.24882677708764667
+              "n_events": 200,
+              "blocked": 0.9130434782608695,
+              "served_median": 0.0,
+              "served_share": 0.20225752508361208
             },
             "lateral (any chain event)": {
               "n_incidents": 23,
-              "n_events": 190,
-              "blocked": 1.0,
+              "n_events": 200,
+              "blocked": 0.9565217391304348,
               "served_median": 0.0,
-              "served_share": 0.11621808143547273
+              "served_share": 0.09118357487922706
             },
             "cred-theft": {
-              "n_incidents": 45,
-              "n_events": 212,
-              "blocked": 0.3333333333333333,
-              "served_median": 4.0,
-              "served_share": 0.6666666666666666
+              "n_incidents": 39,
+              "n_events": 170,
+              "blocked": 0.41025641025641024,
+              "served_median": 3.0,
+              "served_share": 0.5897435897435898
             },
             "theft_variants": {
               "none": {
-                "n_events": 9,
-                "auc": 0.7430203245402442,
-                "recall": 0.2222222222222222,
-                "n_incidents": 2,
+                "n_events": 3,
+                "auc": 0.5966400959972572,
+                "recall": 0.3333333333333333,
+                "n_incidents": 1,
                 "blocked": 1.0,
                 "served_median": 0.0,
                 "served_share": 0.0
               },
               "replay": {
-                "n_events": 20,
-                "auc": 0.6922742139012644,
-                "recall": 0.2,
-                "n_incidents": 4,
-                "blocked": 0.75,
+                "n_events": 4,
+                "auc": 0.438731036256107,
+                "recall": 0.25,
+                "n_incidents": 1,
+                "blocked": 1.0,
                 "served_median": 0.0,
-                "served_share": 0.25
+                "served_share": 0.0
               },
               "mimic": {
-                "n_events": 19,
-                "auc": 0.6419206575321671,
-                "recall": 0.15789473684210525,
+                "n_events": 17,
+                "auc": 0.5238697381755479,
+                "recall": 0.0,
                 "n_incidents": 4,
-                "blocked": 0.75,
-                "served_median": 0.0,
-                "served_share": 0.25
+                "blocked": 0.0,
+                "served_median": 4.0,
+                "served_share": 1.0
               },
               "replay+mimic": {
-                "n_events": 27,
-                "auc": 0.5943332789666904,
+                "n_events": 9,
+                "auc": 0.4595182994771578,
                 "recall": 0.0,
-                "n_incidents": 6,
+                "n_incidents": 2,
                 "blocked": 0.0,
-                "served_median": 5.0,
+                "served_median": 4.5,
                 "served_share": 1.0
               },
               "known-src": {
-                "n_events": 10,
-                "auc": 0.5267363704256909,
-                "recall": 0.1,
-                "n_incidents": 2,
+                "n_events": 31,
+                "auc": 0.5813493808011014,
+                "recall": 0.0967741935483871,
+                "n_incidents": 6,
                 "blocked": 0.5,
-                "served_median": 3.0,
+                "served_median": 1.5,
                 "served_share": 0.5
               },
               "replay+known-src": {
-                "n_events": 9,
-                "auc": 0.4277338552531053,
-                "recall": 0.0,
-                "n_incidents": 2,
-                "blocked": 0.0,
-                "served_median": 4.5,
-                "served_share": 1.0
+                "n_events": 19,
+                "auc": 0.49945054201458905,
+                "recall": 0.15789473684210525,
+                "n_incidents": 5,
+                "blocked": 0.6,
+                "served_median": 0.0,
+                "served_share": 0.4
               },
               "mimic+known-src": {
-                "n_events": 59,
-                "auc": 0.676370748689781,
-                "recall": 0.13559322033898305,
-                "n_incidents": 13,
-                "blocked": 0.46153846153846156,
-                "served_median": 3.0,
-                "served_share": 0.5384615384615384
-              },
-              "replay+mimic+known-src": {
-                "n_events": 59,
-                "auc": 0.6249794306401184,
-                "recall": 0.0,
-                "n_incidents": 12,
-                "blocked": 0.0,
-                "served_median": 5.0,
-                "served_share": 1.0
-              }
-            }
-          }
-        },
-        "scenario": {
-          "fpr_plain": 0.0026357861988506245,
-          "fpr_roaming": 0.0045393858477970625,
-          "fpr_wiped": 0.004784688995215311,
-          "n_roaming": 3745,
-          "n_wiped": 836,
-          "fpr_new_user": 0.008264462809917356,
-          "n_new_user": 121,
-          "theft_recall": 0.04245283018867924,
-          "theft_auc": 0.6352489962551802,
-          "n_theft": 212,
-          "shared_lateral_recall": 0.21428571428571427,
-          "n_shared_lateral": 42
-        },
-        "train_seconds": 760.1060365339999,
-        "use_struct_head": false,
-        "use_hash_identity": true,
-        "use_hist_feats": true,
-        "use_precursor": true,
-        "use_config_node": true
-      },
-      {
-        "threshold": 0.999785686007447,
-        "threshold_dirty": 0.9998297824396927,
-        "threshold_clean_unsup": 0.9994356217026796,
-        "agg_auc": 0.8732112841943178,
-        "agg_ap": 0.337681695808409,
-        "agg_precision": 0.42452830188679247,
-        "agg_recall": 0.31802120141342755,
-        "agg_recall_global": 0.3674911660777385,
-        "lateral_recall_before": 0.4444444444444444,
-        "lateral_recall_after": 0.39111111111111113,
-        "fpr_before": 0.010777501648323782,
-        "fpr_after": 0.0061875538875082415,
-        "per_type": {
-          "policy": {
-            "auc": 0.8606195423592108,
-            "ap": 0.0025965914820849823,
-            "recall": 0.0,
-            "recall_global": 0.0,
-            "n": 14
-          },
-          "contextual": {
-            "auc": 0.987245015689506,
-            "ap": 0.402419590332005,
-            "recall": 0.7777777777777778,
-            "recall_global": 0.8765432098765432,
-            "n": 81
-          },
-          "lateral": {
-            "auc": 0.9431186963085182,
-            "ap": 0.3768388850489737,
-            "recall": 0.39111111111111113,
-            "recall_global": 0.4444444444444444,
-            "n": 225
-          },
-          "cred-theft": {
-            "auc": 0.77744465732574,
-            "ap": 0.045130619728926895,
-            "recall": 0.11788617886178862,
-            "recall_global": 0.15040650406504066,
-            "n": 246
-          },
-          "benign-denied": {
-            "auc": 0.7707727016829874,
-            "ap": 0.04529123915360222,
-            "recall": 0.017054263565891473,
-            "recall_global": 0.03255813953488372,
-            "n": 645
-          }
-        },
-        "cold_start": {
-          "n_warmed": 225,
-          "n_cold": 0,
-          "recall_warmed": 0.39111111111111113,
-          "recall_cold": NaN,
-          "auc_warmed": 0.9431186963085182
-        },
-        "incident": {
-          "routed": {
-            "lateral": {
-              "n_incidents": 26,
-              "n_events": 225,
-              "blocked": 0.9615384615384616,
-              "served_median": 1.0,
-              "served_share": 0.1915168165168165
-            },
-            "lateral (any chain event)": {
-              "n_incidents": 26,
-              "n_events": 225,
-              "blocked": 1.0,
-              "served_median": 0.0,
-              "served_share": 0.03470695970695971
-            },
-            "cred-theft": {
-              "n_incidents": 55,
-              "n_events": 246,
-              "blocked": 0.4727272727272727,
-              "served_median": 3.0,
-              "served_share": 0.5272727272727272
-            },
-            "theft_variants": {
-              "none": {
-                "n_events": 10,
-                "auc": 0.9641831447059733,
-                "recall": 0.3,
-                "n_incidents": 2,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "replay": {
-                "n_events": 16,
-                "auc": 0.9849586867410863,
-                "recall": 0.25,
-                "n_incidents": 3,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "mimic": {
-                "n_events": 25,
-                "auc": 0.6097244064038774,
-                "recall": 0.04,
-                "n_incidents": 6,
-                "blocked": 0.16666666666666666,
-                "served_median": 3.5,
-                "served_share": 0.8333333333333334
-              },
-              "replay+mimic": {
-                "n_events": 9,
-                "auc": 0.7243691653704801,
-                "recall": 0.0,
-                "n_incidents": 2,
-                "blocked": 0.0,
-                "served_median": 4.5,
-                "served_share": 1.0
-              },
-              "known-src": {
-                "n_events": 22,
-                "auc": 0.726271974950724,
-                "recall": 0.18181818181818182,
-                "n_incidents": 5,
+                "n_events": 48,
+                "auc": 0.7700785334704723,
+                "recall": 0.16666666666666666,
+                "n_incidents": 10,
                 "blocked": 0.8,
                 "served_median": 0.0,
                 "served_share": 0.2
               },
-              "replay+known-src": {
-                "n_events": 21,
-                "auc": 0.8401436833466532,
-                "recall": 0.19047619047619047,
-                "n_incidents": 6,
-                "blocked": 0.6666666666666666,
-                "served_median": 0.0,
-                "served_share": 0.3333333333333333
-              },
-              "mimic+known-src": {
-                "n_events": 70,
-                "auc": 0.8797925037657951,
-                "recall": 0.18571428571428572,
-                "n_incidents": 14,
-                "blocked": 0.8571428571428571,
-                "served_median": 0.0,
-                "served_share": 0.14285714285714285
-              },
               "replay+mimic+known-src": {
-                "n_events": 73,
-                "auc": 0.6696069391230461,
+                "n_events": 39,
+                "auc": 0.5586361268798914,
                 "recall": 0.0,
-                "n_incidents": 17,
+                "n_incidents": 10,
                 "blocked": 0.0,
-                "served_median": 4.0,
+                "served_median": 3.5,
                 "served_share": 1.0
               }
             }
+          }
+        },
+        "scenario": {
+          "fpr_plain": 0.007695986782034001,
+          "fpr_roaming": 0.01564185544768069,
+          "fpr_wiped": 0.009102730819245773,
+          "n_roaming": 3708,
+          "n_wiped": 769,
+          "fpr_new_user": 0.0,
+          "n_new_user": 110,
+          "theft_recall": 0.06470588235294118,
+          "theft_auc": 0.6049897902076746,
+          "n_theft": 170,
+          "shared_lateral_recall": 0.28125,
+          "n_shared_lateral": 64
+        },
+        "train_seconds": 779.923261853,
+        "use_struct_head": false,
+        "use_hash_identity": true,
+        "use_hist_feats": true,
+        "use_precursor": true,
+        "use_config_node": true
+      }
+    ],
+    "no_config": [
+      {
+        "threshold": 0.9999999959994749,
+        "threshold_dirty": 0.9999999965668862,
+        "threshold_clean_unsup": 0.9995384671167448,
+        "agg_auc": 0.9005202940147655,
+        "agg_ap": 0.6694754277703503,
+        "agg_precision": 0.8943217665615142,
+        "agg_recall": 0.5108108108108108,
+        "agg_recall_global": 0.6684684684684684,
+        "lateral_recall_before": 0.015,
+        "lateral_recall_after": 0.0,
+        "fpr_before": 0.006145538698894317,
+        "fpr_after": 0.0017228079197737208,
+        "per_type": {
+          "policy": {
+            "auc": 0.9994394445872975,
+            "ap": 0.516113345629078,
+            "recall": 0.8666666666666667,
+            "recall_global": 1.0,
+            "n": 15
           },
-          "global": {
+          "contextual": {
+            "auc": 0.9427485162231516,
+            "ap": 0.3087006274512058,
+            "recall": 0.673469387755102,
+            "recall_global": 0.8979591836734694,
+            "n": 49
+          },
+          "lateral": {
+            "auc": 0.7496812805348418,
+            "ap": 0.014853074925500781,
+            "recall": 0.0,
+            "recall_global": 0.015,
+            "n": 200
+          },
+          "cred-theft": {
+            "auc": 0.6654090723458321,
+            "ap": 0.007199866130485021,
+            "recall": 0.0,
+            "recall_global": 0.023529411764705882,
+            "n": 170
+          },
+          "benign-denied": {
+            "auc": 0.9990169511640327,
+            "ap": 0.9247732536984433,
+            "recall": 0.7707100591715976,
+            "recall_global": 1.0,
+            "n": 676
+          }
+        },
+        "cold_start": {
+          "n_warmed": 200,
+          "n_cold": 0,
+          "recall_warmed": 0.0,
+          "recall_cold": NaN,
+          "auc_warmed": 0.7496812805348418
+        },
+        "incident": {
+          "routed": {
             "lateral": {
-              "n_incidents": 26,
-              "n_events": 225,
-              "blocked": 0.9615384615384616,
-              "served_median": 0.0,
-              "served_share": 0.12153679653679653
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.0,
+              "served_median": 9.0,
+              "served_share": 1.0
             },
             "lateral (any chain event)": {
-              "n_incidents": 26,
-              "n_events": 225,
-              "blocked": 1.0,
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.8260869565217391,
               "served_median": 0.0,
-              "served_share": 0.016025641025641028
+              "served_share": 0.37422360248447206
             },
             "cred-theft": {
-              "n_incidents": 55,
-              "n_events": 246,
-              "blocked": 0.5636363636363636,
-              "served_median": 0.0,
-              "served_share": 0.43636363636363634
+              "n_incidents": 39,
+              "n_events": 170,
+              "blocked": 0.0,
+              "served_median": 4.0,
+              "served_share": 1.0
             },
             "theft_variants": {
               "none": {
-                "n_events": 10,
-                "auc": 0.9641831447059733,
-                "recall": 0.3,
-                "n_incidents": 2,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
+                "n_events": 3,
+                "auc": 0.7408502614211022,
+                "recall": 0.0,
+                "n_incidents": 1,
+                "blocked": 0.0,
+                "served_median": 3.0,
+                "served_share": 1.0
               },
               "replay": {
-                "n_events": 16,
-                "auc": 0.9849586867410863,
-                "recall": 0.375,
-                "n_incidents": 3,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
+                "n_events": 4,
+                "auc": 0.8055734121882232,
+                "recall": 0.0,
+                "n_incidents": 1,
+                "blocked": 0.0,
+                "served_median": 4.0,
+                "served_share": 1.0
               },
               "mimic": {
-                "n_events": 25,
-                "auc": 0.6097244064038774,
-                "recall": 0.04,
-                "n_incidents": 6,
-                "blocked": 0.16666666666666666,
-                "served_median": 3.5,
-                "served_share": 0.8333333333333334
+                "n_events": 17,
+                "auc": 0.6855217582018666,
+                "recall": 0.0,
+                "n_incidents": 4,
+                "blocked": 0.0,
+                "served_median": 4.0,
+                "served_share": 1.0
               },
               "replay+mimic": {
                 "n_events": 9,
-                "auc": 0.7243691653704801,
+                "auc": 0.6899031456244107,
                 "recall": 0.0,
                 "n_incidents": 2,
                 "blocked": 0.0,
@@ -779,2797 +406,2066 @@
                 "served_share": 1.0
               },
               "known-src": {
-                "n_events": 22,
-                "auc": 0.726271974950724,
-                "recall": 0.22727272727272727,
+                "n_events": 31,
+                "auc": 0.5789215239011605,
+                "recall": 0.0,
+                "n_incidents": 6,
+                "blocked": 0.0,
+                "served_median": 5.5,
+                "served_share": 1.0
+              },
+              "replay+known-src": {
+                "n_events": 19,
+                "auc": 0.8148624325019286,
+                "recall": 0.0,
                 "n_incidents": 5,
+                "blocked": 0.0,
+                "served_median": 3.0,
+                "served_share": 1.0
+              },
+              "mimic+known-src": {
+                "n_events": 48,
+                "auc": 0.5811632167652352,
+                "recall": 0.0,
+                "n_incidents": 10,
+                "blocked": 0.0,
+                "served_median": 5.5,
+                "served_share": 1.0
+              },
+              "replay+mimic+known-src": {
+                "n_events": 39,
+                "auc": 0.7304336359620495,
+                "recall": 0.0,
+                "n_incidents": 10,
+                "blocked": 0.0,
+                "served_median": 3.5,
+                "served_share": 1.0
+              }
+            }
+          },
+          "global": {
+            "lateral": {
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.08695652173913043,
+              "served_median": 8.0,
+              "served_share": 0.9516908212560387
+            },
+            "lateral (any chain event)": {
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.9565217391304348,
+              "served_median": 0.0,
+              "served_share": 0.15760869565217392
+            },
+            "cred-theft": {
+              "n_incidents": 39,
+              "n_events": 170,
+              "blocked": 0.10256410256410256,
+              "served_median": 4.0,
+              "served_share": 0.8974358974358975
+            },
+            "theft_variants": {
+              "none": {
+                "n_events": 3,
+                "auc": 0.7408502614211022,
+                "recall": 0.3333333333333333,
+                "n_incidents": 1,
                 "blocked": 1.0,
                 "served_median": 0.0,
                 "served_share": 0.0
               },
+              "replay": {
+                "n_events": 4,
+                "auc": 0.8055734121882232,
+                "recall": 0.0,
+                "n_incidents": 1,
+                "blocked": 0.0,
+                "served_median": 4.0,
+                "served_share": 1.0
+              },
+              "mimic": {
+                "n_events": 17,
+                "auc": 0.6855217582018666,
+                "recall": 0.17647058823529413,
+                "n_incidents": 4,
+                "blocked": 0.75,
+                "served_median": 0.0,
+                "served_share": 0.25
+              },
+              "replay+mimic": {
+                "n_events": 9,
+                "auc": 0.6899031456244107,
+                "recall": 0.0,
+                "n_incidents": 2,
+                "blocked": 0.0,
+                "served_median": 4.5,
+                "served_share": 1.0
+              },
+              "known-src": {
+                "n_events": 31,
+                "auc": 0.5789215239011605,
+                "recall": 0.0,
+                "n_incidents": 6,
+                "blocked": 0.0,
+                "served_median": 5.5,
+                "served_share": 1.0
+              },
               "replay+known-src": {
-                "n_events": 21,
-                "auc": 0.8401436833466532,
-                "recall": 0.23809523809523808,
+                "n_events": 19,
+                "auc": 0.8148624325019286,
+                "recall": 0.0,
+                "n_incidents": 5,
+                "blocked": 0.0,
+                "served_median": 3.0,
+                "served_share": 1.0
+              },
+              "mimic+known-src": {
+                "n_events": 48,
+                "auc": 0.5811632167652352,
+                "recall": 0.0,
+                "n_incidents": 10,
+                "blocked": 0.0,
+                "served_median": 5.5,
+                "served_share": 1.0
+              },
+              "replay+mimic+known-src": {
+                "n_events": 39,
+                "auc": 0.7304336359620495,
+                "recall": 0.0,
+                "n_incidents": 10,
+                "blocked": 0.0,
+                "served_median": 3.5,
+                "served_share": 1.0
+              }
+            }
+          }
+        },
+        "scenario": {
+          "fpr_plain": 0.0016087655985042829,
+          "fpr_roaming": 0.0040453074433656954,
+          "fpr_wiped": 0.0013003901170351106,
+          "n_roaming": 3708,
+          "n_wiped": 769,
+          "fpr_new_user": 0.00909090909090909,
+          "n_new_user": 110,
+          "theft_recall": 0.0,
+          "theft_auc": 0.6654090723458321,
+          "n_theft": 170,
+          "shared_lateral_recall": 0.0,
+          "n_shared_lateral": 64
+        },
+        "train_seconds": 556.7418710469992,
+        "use_struct_head": false,
+        "use_hash_identity": true,
+        "use_hist_feats": true,
+        "use_precursor": true,
+        "use_config_node": false
+      }
+    ],
+    "no_precursor": [
+      {
+        "threshold": 0.9994221250467322,
+        "threshold_dirty": 0.9999998682347973,
+        "threshold_clean_unsup": 0.9978336916416216,
+        "agg_auc": 0.8876093810447115,
+        "agg_ap": 0.655035470762542,
+        "agg_precision": 0.7,
+        "agg_recall": 0.6936936936936937,
+        "agg_recall_global": 0.7189189189189189,
+        "lateral_recall_before": 0.3,
+        "lateral_recall_after": 0.26,
+        "fpr_before": 0.016970943687323218,
+        "fpr_after": 0.008485471843661609,
+        "per_type": {
+          "policy": {
+            "auc": 0.9984057598354332,
+            "ap": 0.290246824141834,
+            "recall": 0.9333333333333333,
+            "recall_global": 1.0,
+            "n": 15
+          },
+          "contextual": {
+            "auc": 0.9250890790875363,
+            "ap": 0.20224076282197156,
+            "recall": 0.7551020408163265,
+            "recall_global": 0.8775510204081632,
+            "n": 49
+          },
+          "lateral": {
+            "auc": 0.775804962715351,
+            "ap": 0.05645125389936122,
+            "recall": 0.26,
+            "recall_global": 0.3,
+            "n": 200
+          },
+          "cred-theft": {
+            "auc": 0.571139110311134,
+            "ap": 0.01081256721609751,
+            "recall": 0.11764705882352941,
+            "recall_global": 0.1411764705882353,
+            "n": 170
+          },
+          "benign-denied": {
+            "auc": 0.9950981070870504,
+            "ap": 0.8481320633461936,
+            "recall": 0.9571005917159763,
+            "recall_global": 0.9704142011834319,
+            "n": 676
+          }
+        },
+        "cold_start": {
+          "n_warmed": 200,
+          "n_cold": 0,
+          "recall_warmed": 0.26,
+          "recall_cold": NaN,
+          "auc_warmed": 0.775804962715351
+        },
+        "incident": {
+          "routed": {
+            "lateral": {
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.9130434782608695,
+              "served_median": 2.0,
+              "served_share": 0.28452935952935954
+            },
+            "lateral (any chain event)": {
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.9565217391304348,
+              "served_median": 0.0,
+              "served_share": 0.09118357487922706
+            },
+            "cred-theft": {
+              "n_incidents": 39,
+              "n_events": 170,
+              "blocked": 0.5128205128205128,
+              "served_median": 0.0,
+              "served_share": 0.48717948717948717
+            },
+            "theft_variants": {
+              "none": {
+                "n_events": 3,
+                "auc": 0.3795577269220879,
+                "recall": 0.3333333333333333,
+                "n_incidents": 1,
+                "blocked": 1.0,
+                "served_median": 0.0,
+                "served_share": 0.0
+              },
+              "replay": {
+                "n_events": 4,
+                "auc": 0.35562483929030597,
+                "recall": 0.0,
+                "n_incidents": 1,
+                "blocked": 0.0,
+                "served_median": 4.0,
+                "served_share": 1.0
+              },
+              "mimic": {
+                "n_events": 17,
+                "auc": 0.6532845280050822,
+                "recall": 0.11764705882352941,
+                "n_incidents": 4,
+                "blocked": 0.5,
+                "served_median": 1.5,
+                "served_share": 0.5
+              },
+              "replay+mimic": {
+                "n_events": 9,
+                "auc": 0.5240421702237079,
+                "recall": 0.0,
+                "n_incidents": 2,
+                "blocked": 0.0,
+                "served_median": 4.5,
+                "served_share": 1.0
+              },
+              "known-src": {
+                "n_events": 31,
+                "auc": 0.440016921175524,
+                "recall": 0.16129032258064516,
                 "n_incidents": 6,
                 "blocked": 0.8333333333333334,
                 "served_median": 0.0,
                 "served_share": 0.16666666666666666
               },
-              "mimic+known-src": {
-                "n_events": 70,
-                "auc": 0.8797925037657951,
-                "recall": 0.22857142857142856,
-                "n_incidents": 14,
-                "blocked": 1.0,
+              "replay+known-src": {
+                "n_events": 19,
+                "auc": 0.48697134969076067,
+                "recall": 0.15789473684210525,
+                "n_incidents": 5,
+                "blocked": 0.6,
                 "served_median": 0.0,
-                "served_share": 0.0
+                "served_share": 0.4
               },
-              "replay+mimic+known-src": {
-                "n_events": 73,
-                "auc": 0.6696069391230461,
-                "recall": 0.0136986301369863,
-                "n_incidents": 17,
-                "blocked": 0.058823529411764705,
-                "served_median": 4.0,
-                "served_share": 0.9411764705882353
-              }
-            }
-          }
-        },
-        "scenario": {
-          "fpr_plain": 0.004952232403977384,
-          "fpr_roaming": 0.011342155009451797,
-          "fpr_wiped": 0.0,
-          "n_roaming": 3703,
-          "n_wiped": 508,
-          "fpr_new_user": 0.00847457627118644,
-          "n_new_user": 118,
-          "theft_recall": 0.11788617886178862,
-          "theft_auc": 0.77744465732574,
-          "n_theft": 246,
-          "shared_lateral_recall": 0.28378378378378377,
-          "n_shared_lateral": 74
-        },
-        "train_seconds": 781.1604247940004,
-        "use_struct_head": false,
-        "use_hash_identity": true,
-        "use_hist_feats": true,
-        "use_precursor": true,
-        "use_config_node": true
-      },
-      {
-        "threshold": 0.9998737590810695,
-        "threshold_dirty": 0.9992018413667085,
-        "threshold_clean_unsup": 0.9997295396896019,
-        "agg_auc": 0.8360273328668133,
-        "agg_ap": 0.2215968267518773,
-        "agg_precision": 0.298372513562387,
-        "agg_recall": 0.308411214953271,
-        "agg_recall_global": 0.31962616822429907,
-        "lateral_recall_before": 0.38565022421524664,
-        "lateral_recall_after": 0.34080717488789236,
-        "fpr_before": 0.012238692512352718,
-        "fpr_after": 0.009831496262511086,
-        "per_type": {
-          "policy": {
-            "auc": 0.879838254781176,
-            "ap": 0.0037738734203646967,
-            "recall": 0.0,
-            "recall_global": 0.08695652173913043,
-            "n": 23
-          },
-          "contextual": {
-            "auc": 0.9617781583282753,
-            "ap": 0.09259118902141379,
-            "recall": 0.7763157894736842,
-            "recall_global": 0.6710526315789473,
-            "n": 76
-          },
-          "lateral": {
-            "auc": 0.9016962049630248,
-            "ap": 0.22190251433339786,
-            "recall": 0.34080717488789236,
-            "recall_global": 0.38565022421524664,
-            "n": 223
-          },
-          "cred-theft": {
-            "auc": 0.7215626957792886,
-            "ap": 0.058057928156600436,
-            "recall": 0.14084507042253522,
-            "recall_global": 0.15023474178403756,
-            "n": 213
-          },
-          "benign-denied": {
-            "auc": 0.6888157710289732,
-            "ap": 0.0287260144805549,
-            "recall": 0.024311183144246355,
-            "recall_global": 0.03403565640194489,
-            "n": 617
-          }
-        },
-        "cold_start": {
-          "n_warmed": 222,
-          "n_cold": 1,
-          "recall_warmed": 0.34234234234234234,
-          "recall_cold": 0.0,
-          "auc_warmed": 0.9013521862059752
-        },
-        "incident": {
-          "routed": {
-            "lateral": {
-              "n_incidents": 26,
-              "n_events": 223,
-              "blocked": 0.9615384615384616,
-              "served_median": 0.0,
-              "served_share": 0.1959124209124209
-            },
-            "lateral (any chain event)": {
-              "n_incidents": 26,
-              "n_events": 223,
-              "blocked": 0.9615384615384616,
-              "served_median": 0.0,
-              "served_share": 0.06934731934731936
-            },
-            "cred-theft": {
-              "n_incidents": 52,
-              "n_events": 213,
-              "blocked": 0.46153846153846156,
-              "served_median": 3.0,
-              "served_share": 0.5384615384615384
-            },
-            "theft_variants": {
-              "none": {
-                "n_events": 16,
-                "auc": 0.7973399531507414,
+              "mimic+known-src": {
+                "n_events": 48,
+                "auc": 0.6743330547698637,
                 "recall": 0.1875,
-                "n_incidents": 4,
-                "blocked": 0.75,
-                "served_median": 0.0,
-                "served_share": 0.25
-              },
-              "replay": {
-                "n_events": 8,
-                "auc": 0.8955094213344316,
-                "recall": 0.25,
-                "n_incidents": 2,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "mimic": {
-                "n_events": 35,
-                "auc": 0.7736511532125206,
-                "recall": 0.2571428571428571,
-                "n_incidents": 9,
-                "blocked": 0.6666666666666666,
-                "served_median": 0.0,
-                "served_share": 0.3333333333333333
-              },
-              "replay+mimic": {
-                "n_events": 21,
-                "auc": 0.43888512983447087,
-                "recall": 0.0,
-                "n_incidents": 5,
-                "blocked": 0.0,
-                "served_median": 4.0,
-                "served_share": 1.0
-              },
-              "known-src": {
-                "n_events": 20,
-                "auc": 0.7638501338550248,
-                "recall": 0.15,
-                "n_incidents": 4,
-                "blocked": 0.75,
-                "served_median": 0.0,
-                "served_share": 0.25
-              },
-              "replay+known-src": {
-                "n_events": 24,
-                "auc": 0.7689638677237781,
-                "recall": 0.20833333333333334,
-                "n_incidents": 7,
-                "blocked": 0.7142857142857143,
-                "served_median": 0.0,
-                "served_share": 0.2857142857142857
-              },
-              "mimic+known-src": {
-                "n_events": 35,
-                "auc": 0.8291767180513061,
-                "recall": 0.22857142857142856,
-                "n_incidents": 8,
-                "blocked": 0.625,
-                "served_median": 0.0,
-                "served_share": 0.375
-              },
-              "replay+mimic+known-src": {
-                "n_events": 54,
-                "auc": 0.6430303862346696,
-                "recall": 0.0,
-                "n_incidents": 13,
-                "blocked": 0.0,
-                "served_median": 4.0,
-                "served_share": 1.0
-              }
-            }
-          },
-          "global": {
-            "lateral": {
-              "n_incidents": 26,
-              "n_events": 223,
-              "blocked": 0.9615384615384616,
-              "served_median": 0.0,
-              "served_share": 0.15648934398934394
-            },
-            "lateral (any chain event)": {
-              "n_incidents": 26,
-              "n_events": 223,
-              "blocked": 0.9615384615384616,
-              "served_median": 0.0,
-              "served_share": 0.06934731934731936
-            },
-            "cred-theft": {
-              "n_incidents": 52,
-              "n_events": 213,
-              "blocked": 0.5,
-              "served_median": 1.5,
-              "served_share": 0.5
-            },
-            "theft_variants": {
-              "none": {
-                "n_events": 16,
-                "auc": 0.7973399531507414,
-                "recall": 0.25,
-                "n_incidents": 4,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "replay": {
-                "n_events": 8,
-                "auc": 0.8955094213344316,
-                "recall": 0.25,
-                "n_incidents": 2,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "mimic": {
-                "n_events": 35,
-                "auc": 0.7736511532125206,
-                "recall": 0.2571428571428571,
-                "n_incidents": 9,
-                "blocked": 0.6666666666666666,
-                "served_median": 0.0,
-                "served_share": 0.3333333333333333
-              },
-              "replay+mimic": {
-                "n_events": 21,
-                "auc": 0.43888512983447087,
-                "recall": 0.0,
-                "n_incidents": 5,
-                "blocked": 0.0,
-                "served_median": 4.0,
-                "served_share": 1.0
-              },
-              "known-src": {
-                "n_events": 20,
-                "auc": 0.7638501338550248,
-                "recall": 0.15,
-                "n_incidents": 4,
-                "blocked": 0.75,
-                "served_median": 0.0,
-                "served_share": 0.25
-              },
-              "replay+known-src": {
-                "n_events": 24,
-                "auc": 0.7689638677237781,
-                "recall": 0.25,
-                "n_incidents": 7,
-                "blocked": 0.8571428571428571,
-                "served_median": 0.0,
-                "served_share": 0.14285714285714285
-              },
-              "mimic+known-src": {
-                "n_events": 35,
-                "auc": 0.8291767180513061,
-                "recall": 0.22857142857142856,
-                "n_incidents": 8,
-                "blocked": 0.625,
-                "served_median": 0.0,
-                "served_share": 0.375
-              },
-              "replay+mimic+known-src": {
-                "n_events": 54,
-                "auc": 0.6430303862346696,
-                "recall": 0.0,
-                "n_incidents": 13,
-                "blocked": 0.0,
-                "served_median": 4.0,
-                "served_share": 1.0
-              }
-            }
-          }
-        },
-        "scenario": {
-          "fpr_plain": 0.008630789658673749,
-          "fpr_roaming": 0.015522230991844252,
-          "fpr_wiped": 0.020168067226890758,
-          "n_roaming": 3801,
-          "n_wiped": 595,
-          "fpr_new_user": 0.016129032258064516,
-          "n_new_user": 124,
-          "theft_recall": 0.14084507042253522,
-          "theft_auc": 0.7215626957792886,
-          "n_theft": 213,
-          "shared_lateral_recall": 0.36792452830188677,
-          "n_shared_lateral": 106
-        },
-        "train_seconds": 802.0943444410004,
-        "use_struct_head": false,
-        "use_hash_identity": true,
-        "use_hist_feats": true,
-        "use_precursor": true,
-        "use_config_node": true
-      },
-      {
-        "threshold": 0.9999929577289413,
-        "threshold_dirty": 0.9998523862818216,
-        "threshold_clean_unsup": 0.9997550889869933,
-        "agg_auc": 0.773805554906941,
-        "agg_ap": 0.24183629005306906,
-        "agg_precision": 0.48497854077253216,
-        "agg_recall": 0.24145299145299146,
-        "agg_recall_global": 0.29914529914529914,
-        "lateral_recall_before": 0.3548387096774194,
-        "lateral_recall_after": 0.2903225806451613,
-        "fpr_before": 0.007310533238895072,
-        "fpr_after": 0.0030355155317211375,
-        "per_type": {
-          "policy": {
-            "auc": 0.9423047947345018,
-            "ap": 0.004254139857670093,
-            "recall": 0.0,
-            "recall_global": 0.0,
-            "n": 14
-          },
-          "contextual": {
-            "auc": 0.9817910730728692,
-            "ap": 0.23910758348131506,
-            "recall": 0.7671232876712328,
-            "recall_global": 0.7945205479452054,
-            "n": 73
-          },
-          "lateral": {
-            "auc": 0.9387962289108536,
-            "ap": 0.2715836706048332,
-            "recall": 0.2903225806451613,
-            "recall_global": 0.3548387096774194,
-            "n": 155
-          },
-          "cred-theft": {
-            "auc": 0.5879667371556434,
-            "ap": 0.03540903803801585,
-            "recall": 0.05309734513274336,
-            "recall_global": 0.11946902654867257,
-            "n": 226
-          },
-          "benign-denied": {
-            "auc": 0.7564032003832409,
-            "ap": 0.03999947482719957,
-            "recall": 0.012139605462822459,
-            "recall_global": 0.018209408194233688,
-            "n": 659
-          }
-        },
-        "cold_start": {
-          "n_warmed": 155,
-          "n_cold": 0,
-          "recall_warmed": 0.2903225806451613,
-          "recall_cold": NaN,
-          "auc_warmed": 0.9387962289108536
-        },
-        "incident": {
-          "routed": {
-            "lateral": {
-              "n_incidents": 21,
-              "n_events": 155,
-              "blocked": 0.8571428571428571,
-              "served_median": 1.0,
-              "served_share": 0.34973426044854616
-            },
-            "lateral (any chain event)": {
-              "n_incidents": 21,
-              "n_events": 155,
-              "blocked": 0.9523809523809523,
-              "served_median": 0.0,
-              "served_share": 0.11760858189429618
-            },
-            "cred-theft": {
-              "n_incidents": 51,
-              "n_events": 226,
-              "blocked": 0.21568627450980393,
-              "served_median": 4.0,
-              "served_share": 0.7843137254901961
-            },
-            "theft_variants": {
-              "none": {
-                "n_events": 19,
-                "auc": 0.6190022299336435,
-                "recall": 0.15789473684210525,
-                "n_incidents": 4,
-                "blocked": 0.75,
-                "served_median": 0.0,
-                "served_share": 0.25
-              },
-              "replay": {
-                "n_events": 13,
-                "auc": 0.7263693012155955,
-                "recall": 0.15384615384615385,
-                "n_incidents": 4,
-                "blocked": 0.5,
-                "served_median": 1.5,
-                "served_share": 0.5
-              },
-              "mimic": {
-                "n_events": 19,
-                "auc": 0.7104972061517465,
-                "recall": 0.10526315789473684,
-                "n_incidents": 5,
-                "blocked": 0.2,
-                "served_median": 3.0,
-                "served_share": 0.8
-              },
-              "replay+mimic": {
-                "n_events": 48,
-                "auc": 0.6283828106912253,
-                "recall": 0.0,
-                "n_incidents": 9,
-                "blocked": 0.0,
-                "served_median": 6.0,
-                "served_share": 1.0
-              },
-              "known-src": {
-                "n_events": 39,
-                "auc": 0.4533395072844048,
-                "recall": 0.1282051282051282,
-                "n_incidents": 10,
-                "blocked": 0.5,
-                "served_median": 1.5,
-                "served_share": 0.5
-              },
-              "replay+known-src": {
-                "n_events": 10,
-                "auc": 0.5267383530985517,
-                "recall": 0.0,
-                "n_incidents": 2,
-                "blocked": 0.0,
-                "served_median": 5.0,
-                "served_share": 1.0
-              },
-              "mimic+known-src": {
-                "n_events": 50,
-                "auc": 0.5105209271216525,
-                "recall": 0.0,
-                "n_incidents": 11,
-                "blocked": 0.0,
-                "served_median": 5.0,
-                "served_share": 1.0
-              },
-              "replay+mimic+known-src": {
-                "n_events": 28,
-                "auc": 0.6978981004075543,
-                "recall": 0.0,
-                "n_incidents": 6,
-                "blocked": 0.0,
-                "served_median": 5.0,
-                "served_share": 1.0
-              }
-            }
-          },
-          "global": {
-            "lateral": {
-              "n_incidents": 21,
-              "n_events": 155,
-              "blocked": 0.9523809523809523,
-              "served_median": 1.0,
-              "served_share": 0.23578868221725363
-            },
-            "lateral (any chain event)": {
-              "n_incidents": 21,
-              "n_events": 155,
-              "blocked": 1.0,
-              "served_median": 0.0,
-              "served_share": 0.06998953427524857
-            },
-            "cred-theft": {
-              "n_incidents": 51,
-              "n_events": 226,
-              "blocked": 0.49019607843137253,
-              "served_median": 3.0,
-              "served_share": 0.5098039215686274
-            },
-            "theft_variants": {
-              "none": {
-                "n_events": 19,
-                "auc": 0.6190022299336435,
-                "recall": 0.21052631578947367,
-                "n_incidents": 4,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "replay": {
-                "n_events": 13,
-                "auc": 0.7263693012155955,
-                "recall": 0.3076923076923077,
-                "n_incidents": 4,
-                "blocked": 1.0,
-                "served_median": 0.0,
-                "served_share": 0.0
-              },
-              "mimic": {
-                "n_events": 19,
-                "auc": 0.7104972061517465,
-                "recall": 0.15789473684210525,
-                "n_incidents": 5,
-                "blocked": 0.2,
-                "served_median": 3.0,
-                "served_share": 0.8
-              },
-              "replay+mimic": {
-                "n_events": 48,
-                "auc": 0.6283828106912253,
-                "recall": 0.0,
-                "n_incidents": 9,
-                "blocked": 0.0,
-                "served_median": 6.0,
-                "served_share": 1.0
-              },
-              "known-src": {
-                "n_events": 39,
-                "auc": 0.4533395072844048,
-                "recall": 0.23076923076923078,
                 "n_incidents": 10,
                 "blocked": 0.9,
                 "served_median": 0.0,
                 "served_share": 0.1
               },
-              "replay+known-src": {
-                "n_events": 10,
-                "auc": 0.5267383530985517,
-                "recall": 0.1,
+              "replay+mimic+known-src": {
+                "n_events": 39,
+                "auc": 0.601263919931958,
+                "recall": 0.0,
+                "n_incidents": 10,
+                "blocked": 0.0,
+                "served_median": 3.5,
+                "served_share": 1.0
+              }
+            }
+          },
+          "global": {
+            "lateral": {
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.9130434782608695,
+              "served_median": 1.0,
+              "served_share": 0.23162574140835013
+            },
+            "lateral (any chain event)": {
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.9565217391304348,
+              "served_median": 0.0,
+              "served_share": 0.09118357487922706
+            },
+            "cred-theft": {
+              "n_incidents": 39,
+              "n_events": 170,
+              "blocked": 0.6153846153846154,
+              "served_median": 0.0,
+              "served_share": 0.38461538461538464
+            },
+            "theft_variants": {
+              "none": {
+                "n_events": 3,
+                "auc": 0.3795577269220879,
+                "recall": 0.3333333333333333,
+                "n_incidents": 1,
+                "blocked": 1.0,
+                "served_median": 0.0,
+                "served_share": 0.0
+              },
+              "replay": {
+                "n_events": 4,
+                "auc": 0.35562483929030597,
+                "recall": 0.25,
+                "n_incidents": 1,
+                "blocked": 1.0,
+                "served_median": 0.0,
+                "served_share": 0.0
+              },
+              "mimic": {
+                "n_events": 17,
+                "auc": 0.6532845280050822,
+                "recall": 0.17647058823529413,
+                "n_incidents": 4,
+                "blocked": 0.75,
+                "served_median": 0.0,
+                "served_share": 0.25
+              },
+              "replay+mimic": {
+                "n_events": 9,
+                "auc": 0.5240421702237079,
+                "recall": 0.0,
                 "n_incidents": 2,
-                "blocked": 0.5,
-                "served_median": 3.0,
-                "served_share": 0.5
+                "blocked": 0.0,
+                "served_median": 4.5,
+                "served_share": 1.0
+              },
+              "known-src": {
+                "n_events": 31,
+                "auc": 0.440016921175524,
+                "recall": 0.1935483870967742,
+                "n_incidents": 6,
+                "blocked": 1.0,
+                "served_median": 0.0,
+                "served_share": 0.0
+              },
+              "replay+known-src": {
+                "n_events": 19,
+                "auc": 0.48697134969076067,
+                "recall": 0.21052631578947367,
+                "n_incidents": 5,
+                "blocked": 0.8,
+                "served_median": 0.0,
+                "served_share": 0.2
               },
               "mimic+known-src": {
-                "n_events": 50,
-                "auc": 0.5105209271216525,
-                "recall": 0.12,
-                "n_incidents": 11,
-                "blocked": 0.5454545454545454,
+                "n_events": 48,
+                "auc": 0.6743330547698637,
+                "recall": 0.1875,
+                "n_incidents": 10,
+                "blocked": 0.9,
                 "served_median": 0.0,
-                "served_share": 0.45454545454545453
+                "served_share": 0.1
               },
               "replay+mimic+known-src": {
-                "n_events": 28,
-                "auc": 0.6978981004075543,
+                "n_events": 39,
+                "auc": 0.601263919931958,
                 "recall": 0.0,
-                "n_incidents": 6,
+                "n_incidents": 10,
                 "blocked": 0.0,
-                "served_median": 5.0,
+                "served_median": 3.5,
                 "served_share": 1.0
               }
             }
           }
         },
         "scenario": {
-          "fpr_plain": 0.0026363820726019063,
-          "fpr_roaming": 0.00474808757583751,
-          "fpr_wiped": 0.0,
-          "n_roaming": 3791,
-          "n_wiped": 581,
-          "fpr_new_user": 0.00819672131147541,
-          "n_new_user": 122,
-          "theft_recall": 0.05309734513274336,
-          "theft_auc": 0.5879667371556434,
-          "n_theft": 226,
-          "shared_lateral_recall": 0.16666666666666666,
-          "n_shared_lateral": 30
+          "fpr_plain": 0.00795686768989956,
+          "fpr_roaming": 0.015911542610571736,
+          "fpr_wiped": 0.007802340702210663,
+          "n_roaming": 3708,
+          "n_wiped": 769,
+          "fpr_new_user": 0.00909090909090909,
+          "n_new_user": 110,
+          "theft_recall": 0.11764705882352941,
+          "theft_auc": 0.571139110311134,
+          "n_theft": 170,
+          "shared_lateral_recall": 0.25,
+          "n_shared_lateral": 64
         },
-        "train_seconds": 797.3747808689986,
+        "train_seconds": 787.7612125759988,
         "use_struct_head": false,
         "use_hash_identity": true,
         "use_hist_feats": true,
-        "use_precursor": true,
+        "use_precursor": false,
         "use_config_node": true
       }
     ],
-    "summary": {
+    "no_hist": [
+      {
+        "threshold": 0.9999874645159574,
+        "threshold_dirty": 0.999999942190166,
+        "threshold_clean_unsup": 0.9998404123232141,
+        "agg_auc": 0.8785159342937693,
+        "agg_ap": 0.6328593814550978,
+        "agg_precision": 0.8601747815230961,
+        "agg_recall": 0.6207207207207207,
+        "agg_recall_global": 0.6666666666666666,
+        "lateral_recall_before": 0.15,
+        "lateral_recall_after": 0.035,
+        "fpr_before": 0.006351247107225508,
+        "fpr_after": 0.0028799177166366676,
+        "per_type": {
+          "policy": {
+            "auc": 0.9989131739093169,
+            "ap": 0.22264892903795622,
+            "recall": 0.9333333333333333,
+            "recall_global": 1.0,
+            "n": 15
+          },
+          "contextual": {
+            "auc": 0.9294199757557947,
+            "ap": 0.26477545410737896,
+            "recall": 0.8367346938775511,
+            "recall_global": 0.8775510204081632,
+            "n": 49
+          },
+          "lateral": {
+            "auc": 0.812200694265878,
+            "ap": 0.04331876706177173,
+            "recall": 0.035,
+            "recall_global": 0.15,
+            "n": 200
+          },
+          "cred-theft": {
+            "auc": 0.46155839244929137,
+            "ap": 0.004548627956943307,
+            "recall": 0.0,
+            "recall_global": 0.0058823529411764705,
+            "n": 170
+          },
+          "benign-denied": {
+            "auc": 0.9966306879820341,
+            "ap": 0.8280065446864527,
+            "recall": 0.9275147928994083,
+            "recall_global": 0.9630177514792899,
+            "n": 676
+          }
+        },
+        "cold_start": {
+          "n_warmed": 200,
+          "n_cold": 0,
+          "recall_warmed": 0.035,
+          "recall_cold": NaN,
+          "auc_warmed": 0.812200694265878
+        },
+        "incident": {
+          "routed": {
+            "lateral": {
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.2608695652173913,
+              "served_median": 8.0,
+              "served_share": 0.7821428571428571
+            },
+            "lateral (any chain event)": {
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.9130434782608695,
+              "served_median": 0.0,
+              "served_share": 0.1793478260869565
+            },
+            "cred-theft": {
+              "n_incidents": 39,
+              "n_events": 170,
+              "blocked": 0.0,
+              "served_median": 4.0,
+              "served_share": 1.0
+            },
+            "theft_variants": {
+              "none": {
+                "n_events": 3,
+                "auc": 0.6084854718436616,
+                "recall": 0.0,
+                "n_incidents": 1,
+                "blocked": 0.0,
+                "served_median": 3.0,
+                "served_share": 1.0
+              },
+              "replay": {
+                "n_events": 4,
+                "auc": 0.3874389303162767,
+                "recall": 0.0,
+                "n_incidents": 1,
+                "blocked": 0.0,
+                "served_median": 4.0,
+                "served_share": 1.0
+              },
+              "mimic": {
+                "n_events": 17,
+                "auc": 0.3584121125951023,
+                "recall": 0.0,
+                "n_incidents": 4,
+                "blocked": 0.0,
+                "served_median": 4.0,
+                "served_share": 1.0
+              },
+              "replay+mimic": {
+                "n_events": 9,
+                "auc": 0.21412816776663526,
+                "recall": 0.0,
+                "n_incidents": 2,
+                "blocked": 0.0,
+                "served_median": 4.5,
+                "served_share": 1.0
+              },
+              "known-src": {
+                "n_events": 31,
+                "auc": 0.3292728041871615,
+                "recall": 0.0,
+                "n_incidents": 6,
+                "blocked": 0.0,
+                "served_median": 5.5,
+                "served_share": 1.0
+              },
+              "replay+known-src": {
+                "n_events": 19,
+                "auc": 0.5402362940006225,
+                "recall": 0.0,
+                "n_incidents": 5,
+                "blocked": 0.0,
+                "served_median": 3.0,
+                "served_share": 1.0
+              },
+              "mimic+known-src": {
+                "n_events": 48,
+                "auc": 0.5039641724522157,
+                "recall": 0.0,
+                "n_incidents": 10,
+                "blocked": 0.0,
+                "served_median": 5.5,
+                "served_share": 1.0
+              },
+              "replay+mimic+known-src": {
+                "n_events": 39,
+                "auc": 0.574546881078123,
+                "recall": 0.0,
+                "n_incidents": 10,
+                "blocked": 0.0,
+                "served_median": 3.5,
+                "served_share": 1.0
+              }
+            }
+          },
+          "global": {
+            "lateral": {
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.6521739130434783,
+              "served_median": 2.0,
+              "served_share": 0.4722434570260657
+            },
+            "lateral (any chain event)": {
+              "n_incidents": 23,
+              "n_events": 200,
+              "blocked": 0.9130434782608695,
+              "served_median": 0.0,
+              "served_share": 0.16304347826086957
+            },
+            "cred-theft": {
+              "n_incidents": 39,
+              "n_events": 170,
+              "blocked": 0.02564102564102564,
+              "served_median": 4.0,
+              "served_share": 0.9743589743589743
+            },
+            "theft_variants": {
+              "none": {
+                "n_events": 3,
+                "auc": 0.6084854718436616,
+                "recall": 0.0,
+                "n_incidents": 1,
+                "blocked": 0.0,
+                "served_median": 3.0,
+                "served_share": 1.0
+              },
+              "replay": {
+                "n_events": 4,
+                "auc": 0.3874389303162767,
+                "recall": 0.0,
+                "n_incidents": 1,
+                "blocked": 0.0,
+                "served_median": 4.0,
+                "served_share": 1.0
+              },
+              "mimic": {
+                "n_events": 17,
+                "auc": 0.3584121125951023,
+                "recall": 0.0,
+                "n_incidents": 4,
+                "blocked": 0.0,
+                "served_median": 4.0,
+                "served_share": 1.0
+              },
+              "replay+mimic": {
+                "n_events": 9,
+                "auc": 0.21412816776663526,
+                "recall": 0.0,
+                "n_incidents": 2,
+                "blocked": 0.0,
+                "served_median": 4.5,
+                "served_share": 1.0
+              },
+              "known-src": {
+                "n_events": 31,
+                "auc": 0.3292728041871615,
+                "recall": 0.0,
+                "n_incidents": 6,
+                "blocked": 0.0,
+                "served_median": 5.5,
+                "served_share": 1.0
+              },
+              "replay+known-src": {
+                "n_events": 19,
+                "auc": 0.5402362940006225,
+                "recall": 0.0,
+                "n_incidents": 5,
+                "blocked": 0.0,
+                "served_median": 3.0,
+                "served_share": 1.0
+              },
+              "mimic+known-src": {
+                "n_events": 48,
+                "auc": 0.5039641724522157,
+                "recall": 0.020833333333333332,
+                "n_incidents": 10,
+                "blocked": 0.1,
+                "served_median": 4.5,
+                "served_share": 0.9
+              },
+              "replay+mimic+known-src": {
+                "n_events": 39,
+                "auc": 0.574546881078123,
+                "recall": 0.0,
+                "n_incidents": 10,
+                "blocked": 0.0,
+                "served_median": 3.5,
+                "served_share": 1.0
+              }
+            }
+          }
+        },
+        "scenario": {
+          "fpr_plain": 0.0028262098352102266,
+          "fpr_roaming": 0.004584681769147788,
+          "fpr_wiped": 0.0013003901170351106,
+          "n_roaming": 3708,
+          "n_wiped": 769,
+          "fpr_new_user": 0.01818181818181818,
+          "n_new_user": 110,
+          "theft_recall": 0.0,
+          "theft_auc": 0.46155839244929137,
+          "n_theft": 170,
+          "shared_lateral_recall": 0.03125,
+          "n_shared_lateral": 64
+        },
+        "train_seconds": 781.4699186690013,
+        "use_struct_head": false,
+        "use_hash_identity": true,
+        "use_hist_feats": false,
+        "use_precursor": true,
+        "use_config_node": true
+      }
+    ]
+  },
+  "summary": {
+    "full": {
       "agg_auc": {
-        "mean": 0.8224071273258253,
-        "std": 0.04492142208617462,
+        "mean": 0.906803249636883,
+        "std": NaN,
         "vals": [
-          0.8520315226628793,
-          0.7769599419981754,
-          0.8732112841943178,
-          0.8360273328668133,
-          0.773805554906941
+          0.906803249636883
         ]
       },
       "agg_ap": {
-        "mean": 0.2545204151811871,
-        "std": 0.04855885406437387,
+        "mean": 0.6621509724375143,
+        "std": NaN,
         "vals": [
-          0.25256721229162227,
-          0.21892005100095796,
-          0.337681695808409,
-          0.2215968267518773,
-          0.24183629005306906
+          0.6621509724375143
         ]
       },
       "agg_recall_global": {
-        "mean": 0.3125340438941184,
-        "std": 0.038331411516215906,
+        "mean": 0.7117117117117117,
+        "std": NaN,
         "vals": [
-          0.3150684931506849,
-          0.2613390928725702,
-          0.3674911660777385,
-          0.31962616822429907,
-          0.29914529914529914
+          0.7117117117117117
         ]
       },
       "agg_recall_routed": {
-        "mean": 0.2764939049695333,
-        "std": 0.049239854115043,
+        "mean": 0.6864864864864865,
+        "std": NaN,
         "vals": [
-          0.30724070450097846,
-          0.20734341252699784,
-          0.31802120141342755,
-          0.308411214953271,
-          0.24145299145299146
+          0.6864864864864865
         ]
       },
       "lat_auc": {
-        "mean": 0.9219462726030786,
-        "std": 0.021881838873610414,
+        "mean": 0.8570905116996657,
+        "std": NaN,
         "vals": [
-          0.9305968514868391,
-          0.8955233813461573,
-          0.9431186963085182,
-          0.9016962049630248,
-          0.9387962289108536
+          0.8570905116996657
         ]
       },
       "lat_ap": {
-        "mean": 0.2730868794415529,
-        "std": 0.06678942182061542,
+        "mean": 0.07939699332675061,
+        "std": NaN,
         "vals": [
-          0.2078498664056285,
-          0.28725946081493126,
-          0.3768388850489737,
-          0.22190251433339786,
-          0.2715836706048332
+          0.07939699332675061
         ]
       },
       "lat_recall_global": {
-        "mean": 0.3815385960088161,
-        "std": 0.03716174299793972,
+        "mean": 0.345,
+        "std": NaN,
         "vals": [
-          0.36486486486486486,
-          0.35789473684210527,
-          0.4444444444444444,
-          0.38565022421524664,
-          0.3548387096774194
+          0.345
         ]
       },
       "lat_recall_routed": {
-        "mean": 0.3375728769798524,
-        "std": 0.0408429340484482,
+        "mean": 0.285,
+        "std": NaN,
         "vals": [
-          0.36036036036036034,
-          0.30526315789473685,
-          0.39111111111111113,
-          0.34080717488789236,
-          0.2903225806451613
+          0.285
         ]
       },
       "theft_auc": {
-        "mean": 0.688028523649902,
-        "std": 0.0755170471725335,
+        "mean": 0.6049897902076746,
+        "std": NaN,
         "vals": [
-          0.717919531733658,
-          0.6352489962551802,
-          0.77744465732574,
-          0.7215626957792886,
-          0.5879667371556434
+          0.6049897902076746
         ]
       },
       "theft_ap": {
-        "mean": 0.04468736618280173,
-        "std": 0.016346459405418873,
+        "mean": 0.009292323223109432,
+        "std": NaN,
         "vals": [
-          0.062338029097460494,
-          0.022501215893004987,
-          0.045130619728926895,
-          0.058057928156600436,
-          0.03540903803801585
+          0.009292323223109432
         ]
       },
       "theft_recall_global": {
-        "mean": 0.1291438900726098,
-        "std": 0.027754151575819924,
+        "mean": 0.09411764705882353,
+        "std": NaN,
         "vals": [
-          0.1407035175879397,
-          0.08490566037735849,
-          0.15040650406504066,
-          0.15023474178403756,
-          0.11946902654867257
+          0.09411764705882353
         ]
       },
       "theft_recall_routed": {
-        "mean": 0.09698693818748094,
-        "std": 0.04580939038111348,
+        "mean": 0.06470588235294118,
+        "std": NaN,
         "vals": [
-          0.1306532663316583,
-          0.04245283018867924,
-          0.11788617886178862,
-          0.14084507042253522,
-          0.05309734513274336
+          0.06470588235294118
         ]
       },
       "policy_auc": {
-        "mean": 0.9031857502497477,
-        "std": 0.03345911461983568,
+        "mean": 0.9986251821376532,
+        "std": NaN,
         "vals": [
-          0.9058177350050032,
-          0.9273484243688463,
-          0.8606195423592108,
-          0.879838254781176,
-          0.9423047947345018
+          0.9986251821376532
         ]
       },
       "policy_ap": {
-        "mean": 0.004071558141779554,
-        "std": 0.0010530185129003179,
+        "mean": 0.38069133775926356,
+        "std": NaN,
         "vals": [
-          0.005527559032657725,
-          0.0042056269161202696,
-          0.0025965914820849823,
-          0.0037738734203646967,
-          0.004254139857670093
+          0.38069133775926356
         ]
       },
       "policy_recall_global": {
-        "mean": 0.02691511387163561,
-        "std": 0.039391920477102375,
+        "mean": 1.0,
+        "std": NaN,
         "vals": [
-          0.047619047619047616,
-          0.0,
-          0.0,
-          0.08695652173913043,
-          0.0
+          1.0
         ]
       },
       "policy_recall_routed": {
-        "mean": 0.009523809523809523,
-        "std": 0.021295885499997995,
+        "mean": 0.9333333333333333,
+        "std": NaN,
         "vals": [
-          0.047619047619047616,
-          0.0,
-          0.0,
-          0.0,
-          0.0
+          0.9333333333333333
         ]
       },
       "ctx_auc": {
-        "mean": 0.9658886875000574,
-        "std": 0.02925135025676328,
+        "mean": 0.9364917270585271,
+        "std": NaN,
         "vals": [
-          0.9820811164257178,
-          0.916548073983919,
-          0.987245015689506,
-          0.9617781583282753,
-          0.9817910730728692
+          0.9364917270585271
         ]
       },
       "ctx_ap": {
-        "mean": 0.22582602406631805,
-        "std": 0.11283105194546257,
+        "mean": 0.23686120388927095,
+        "std": NaN,
         "vals": [
-          0.20765760605109437,
-          0.18735415144576203,
-          0.402419590332005,
-          0.09259118902141379,
-          0.23910758348131506
+          0.23686120388927095
         ]
       },
       "ctx_recall_global": {
-        "mean": 0.7684232778801392,
-        "std": 0.0754439513688734,
+        "mean": 0.8775510204081632,
+        "std": NaN,
         "vals": [
-          0.7391304347826086,
-          0.7608695652173914,
-          0.8765432098765432,
-          0.6710526315789473,
-          0.7945205479452054
+          0.8775510204081632
         ]
       },
       "ctx_recall_routed": {
-        "mean": 0.7352578637381622,
-        "std": 0.06246952899925447,
+        "mean": 0.7755102040816326,
+        "std": NaN,
         "vals": [
-          0.7246376811594203,
-          0.6304347826086957,
-          0.7777777777777778,
-          0.7763157894736842,
-          0.7671232876712328
+          0.7755102040816326
+        ]
+      },
+      "policy_recall": {
+        "mean": 0.9333333333333333,
+        "std": NaN,
+        "vals": [
+          0.9333333333333333
+        ]
+      },
+      "ctx_recall": {
+        "mean": 0.7755102040816326,
+        "std": NaN,
+        "vals": [
+          0.7755102040816326
+        ]
+      },
+      "fpr_routed": {
+        "mean": 0.008382617639496014,
+        "std": NaN,
+        "vals": [
+          0.008382617639496014
+        ]
+      }
+    },
+    "no_config": {
+      "agg_auc": {
+        "mean": 0.9005202940147655,
+        "std": NaN,
+        "vals": [
+          0.9005202940147655
+        ]
+      },
+      "agg_ap": {
+        "mean": 0.6694754277703503,
+        "std": NaN,
+        "vals": [
+          0.6694754277703503
+        ]
+      },
+      "agg_recall_global": {
+        "mean": 0.6684684684684684,
+        "std": NaN,
+        "vals": [
+          0.6684684684684684
+        ]
+      },
+      "agg_recall_routed": {
+        "mean": 0.5108108108108108,
+        "std": NaN,
+        "vals": [
+          0.5108108108108108
+        ]
+      },
+      "lat_auc": {
+        "mean": 0.7496812805348418,
+        "std": NaN,
+        "vals": [
+          0.7496812805348418
+        ]
+      },
+      "lat_ap": {
+        "mean": 0.014853074925500781,
+        "std": NaN,
+        "vals": [
+          0.014853074925500781
+        ]
+      },
+      "lat_recall_global": {
+        "mean": 0.015,
+        "std": NaN,
+        "vals": [
+          0.015
+        ]
+      },
+      "lat_recall_routed": {
+        "mean": 0.0,
+        "std": NaN,
+        "vals": [
+          0.0
+        ]
+      },
+      "theft_auc": {
+        "mean": 0.6654090723458321,
+        "std": NaN,
+        "vals": [
+          0.6654090723458321
+        ]
+      },
+      "theft_ap": {
+        "mean": 0.007199866130485021,
+        "std": NaN,
+        "vals": [
+          0.007199866130485021
+        ]
+      },
+      "theft_recall_global": {
+        "mean": 0.023529411764705882,
+        "std": NaN,
+        "vals": [
+          0.023529411764705882
+        ]
+      },
+      "theft_recall_routed": {
+        "mean": 0.0,
+        "std": NaN,
+        "vals": [
+          0.0
+        ]
+      },
+      "policy_auc": {
+        "mean": 0.9994394445872975,
+        "std": NaN,
+        "vals": [
+          0.9994394445872975
+        ]
+      },
+      "policy_ap": {
+        "mean": 0.516113345629078,
+        "std": NaN,
+        "vals": [
+          0.516113345629078
+        ]
+      },
+      "policy_recall_global": {
+        "mean": 1.0,
+        "std": NaN,
+        "vals": [
+          1.0
+        ]
+      },
+      "policy_recall_routed": {
+        "mean": 0.8666666666666667,
+        "std": NaN,
+        "vals": [
+          0.8666666666666667
+        ]
+      },
+      "ctx_auc": {
+        "mean": 0.9427485162231516,
+        "std": NaN,
+        "vals": [
+          0.9427485162231516
+        ]
+      },
+      "ctx_ap": {
+        "mean": 0.3087006274512058,
+        "std": NaN,
+        "vals": [
+          0.3087006274512058
+        ]
+      },
+      "ctx_recall_global": {
+        "mean": 0.8979591836734694,
+        "std": NaN,
+        "vals": [
+          0.8979591836734694
+        ]
+      },
+      "ctx_recall_routed": {
+        "mean": 0.673469387755102,
+        "std": NaN,
+        "vals": [
+          0.673469387755102
+        ]
+      },
+      "policy_recall": {
+        "mean": 0.8666666666666667,
+        "std": NaN,
+        "vals": [
+          0.8666666666666667
+        ]
+      },
+      "ctx_recall": {
+        "mean": 0.673469387755102,
+        "std": NaN,
+        "vals": [
+          0.673469387755102
+        ]
+      },
+      "fpr_routed": {
+        "mean": 0.0017228079197737208,
+        "std": NaN,
+        "vals": [
+          0.0017228079197737208
+        ]
+      }
+    },
+    "no_precursor": {
+      "agg_auc": {
+        "mean": 0.8876093810447115,
+        "std": NaN,
+        "vals": [
+          0.8876093810447115
+        ]
+      },
+      "agg_ap": {
+        "mean": 0.655035470762542,
+        "std": NaN,
+        "vals": [
+          0.655035470762542
+        ]
+      },
+      "agg_recall_global": {
+        "mean": 0.7189189189189189,
+        "std": NaN,
+        "vals": [
+          0.7189189189189189
+        ]
+      },
+      "agg_recall_routed": {
+        "mean": 0.6936936936936937,
+        "std": NaN,
+        "vals": [
+          0.6936936936936937
+        ]
+      },
+      "lat_auc": {
+        "mean": 0.775804962715351,
+        "std": NaN,
+        "vals": [
+          0.775804962715351
+        ]
+      },
+      "lat_ap": {
+        "mean": 0.05645125389936122,
+        "std": NaN,
+        "vals": [
+          0.05645125389936122
+        ]
+      },
+      "lat_recall_global": {
+        "mean": 0.3,
+        "std": NaN,
+        "vals": [
+          0.3
+        ]
+      },
+      "lat_recall_routed": {
+        "mean": 0.26,
+        "std": NaN,
+        "vals": [
+          0.26
+        ]
+      },
+      "theft_auc": {
+        "mean": 0.571139110311134,
+        "std": NaN,
+        "vals": [
+          0.571139110311134
+        ]
+      },
+      "theft_ap": {
+        "mean": 0.01081256721609751,
+        "std": NaN,
+        "vals": [
+          0.01081256721609751
+        ]
+      },
+      "theft_recall_global": {
+        "mean": 0.1411764705882353,
+        "std": NaN,
+        "vals": [
+          0.1411764705882353
+        ]
+      },
+      "theft_recall_routed": {
+        "mean": 0.11764705882352941,
+        "std": NaN,
+        "vals": [
+          0.11764705882352941
+        ]
+      },
+      "policy_auc": {
+        "mean": 0.9984057598354332,
+        "std": NaN,
+        "vals": [
+          0.9984057598354332
+        ]
+      },
+      "policy_ap": {
+        "mean": 0.290246824141834,
+        "std": NaN,
+        "vals": [
+          0.290246824141834
+        ]
+      },
+      "policy_recall_global": {
+        "mean": 1.0,
+        "std": NaN,
+        "vals": [
+          1.0
+        ]
+      },
+      "policy_recall_routed": {
+        "mean": 0.9333333333333333,
+        "std": NaN,
+        "vals": [
+          0.9333333333333333
+        ]
+      },
+      "ctx_auc": {
+        "mean": 0.9250890790875363,
+        "std": NaN,
+        "vals": [
+          0.9250890790875363
+        ]
+      },
+      "ctx_ap": {
+        "mean": 0.20224076282197156,
+        "std": NaN,
+        "vals": [
+          0.20224076282197156
+        ]
+      },
+      "ctx_recall_global": {
+        "mean": 0.8775510204081632,
+        "std": NaN,
+        "vals": [
+          0.8775510204081632
+        ]
+      },
+      "ctx_recall_routed": {
+        "mean": 0.7551020408163265,
+        "std": NaN,
+        "vals": [
+          0.7551020408163265
+        ]
+      },
+      "policy_recall": {
+        "mean": 0.9333333333333333,
+        "std": NaN,
+        "vals": [
+          0.9333333333333333
+        ]
+      },
+      "ctx_recall": {
+        "mean": 0.7551020408163265,
+        "std": NaN,
+        "vals": [
+          0.7551020408163265
+        ]
+      },
+      "fpr_routed": {
+        "mean": 0.008485471843661609,
+        "std": NaN,
+        "vals": [
+          0.008485471843661609
+        ]
+      }
+    },
+    "no_hist": {
+      "agg_auc": {
+        "mean": 0.8785159342937693,
+        "std": NaN,
+        "vals": [
+          0.8785159342937693
+        ]
+      },
+      "agg_ap": {
+        "mean": 0.6328593814550978,
+        "std": NaN,
+        "vals": [
+          0.6328593814550978
+        ]
+      },
+      "agg_recall_global": {
+        "mean": 0.6666666666666666,
+        "std": NaN,
+        "vals": [
+          0.6666666666666666
+        ]
+      },
+      "agg_recall_routed": {
+        "mean": 0.6207207207207207,
+        "std": NaN,
+        "vals": [
+          0.6207207207207207
+        ]
+      },
+      "lat_auc": {
+        "mean": 0.812200694265878,
+        "std": NaN,
+        "vals": [
+          0.812200694265878
+        ]
+      },
+      "lat_ap": {
+        "mean": 0.04331876706177173,
+        "std": NaN,
+        "vals": [
+          0.04331876706177173
+        ]
+      },
+      "lat_recall_global": {
+        "mean": 0.15,
+        "std": NaN,
+        "vals": [
+          0.15
+        ]
+      },
+      "lat_recall_routed": {
+        "mean": 0.035,
+        "std": NaN,
+        "vals": [
+          0.035
+        ]
+      },
+      "theft_auc": {
+        "mean": 0.46155839244929137,
+        "std": NaN,
+        "vals": [
+          0.46155839244929137
+        ]
+      },
+      "theft_ap": {
+        "mean": 0.004548627956943307,
+        "std": NaN,
+        "vals": [
+          0.004548627956943307
+        ]
+      },
+      "theft_recall_global": {
+        "mean": 0.0058823529411764705,
+        "std": NaN,
+        "vals": [
+          0.0058823529411764705
+        ]
+      },
+      "theft_recall_routed": {
+        "mean": 0.0,
+        "std": NaN,
+        "vals": [
+          0.0
+        ]
+      },
+      "policy_auc": {
+        "mean": 0.9989131739093169,
+        "std": NaN,
+        "vals": [
+          0.9989131739093169
+        ]
+      },
+      "policy_ap": {
+        "mean": 0.22264892903795622,
+        "std": NaN,
+        "vals": [
+          0.22264892903795622
+        ]
+      },
+      "policy_recall_global": {
+        "mean": 1.0,
+        "std": NaN,
+        "vals": [
+          1.0
+        ]
+      },
+      "policy_recall_routed": {
+        "mean": 0.9333333333333333,
+        "std": NaN,
+        "vals": [
+          0.9333333333333333
+        ]
+      },
+      "ctx_auc": {
+        "mean": 0.9294199757557947,
+        "std": NaN,
+        "vals": [
+          0.9294199757557947
+        ]
+      },
+      "ctx_ap": {
+        "mean": 0.26477545410737896,
+        "std": NaN,
+        "vals": [
+          0.26477545410737896
+        ]
+      },
+      "ctx_recall_global": {
+        "mean": 0.8775510204081632,
+        "std": NaN,
+        "vals": [
+          0.8775510204081632
+        ]
+      },
+      "ctx_recall_routed": {
+        "mean": 0.8367346938775511,
+        "std": NaN,
+        "vals": [
+          0.8367346938775511
+        ]
+      },
+      "policy_recall": {
+        "mean": 0.9333333333333333,
+        "std": NaN,
+        "vals": [
+          0.9333333333333333
+        ]
+      },
+      "ctx_recall": {
+        "mean": 0.8367346938775511,
+        "std": NaN,
+        "vals": [
+          0.8367346938775511
+        ]
+      },
+      "fpr_routed": {
+        "mean": 0.0028799177166366676,
+        "std": NaN,
+        "vals": [
+          0.0028799177166366676
         ]
       }
     }
   },
-  "baselines": {
-    "raw": {
-      "iforest_noprec": [
-        {
-          "agg_auc": 0.5836416879252806,
-          "agg_ap": 0.019852326778579128,
-          "agg_precision": 0.0379746835443038,
-          "agg_recall": 0.029354207436399216,
-          "per_type": {
-            "policy": {
-              "auc": 0.8024469264426002,
-              "ap": 0.0026921374634210258,
-              "recall": 0.047619047619047616,
-              "n": 21
-            },
-            "contextual": {
-              "auc": 0.6171088912177616,
-              "ap": 0.0024969325689285452,
-              "recall": 0.0,
-              "n": 69
-            },
-            "lateral": {
-              "auc": 0.4580369538265088,
-              "ap": 0.004850587387079623,
-              "recall": 0.009009009009009009,
-              "n": 222
-            },
-            "cred-theft": {
-              "auc": 0.7008787887728714,
-              "ap": 0.02062265754174774,
-              "recall": 0.06030150753768844,
-              "n": 199
-            },
-            "benign-denied": {
-              "auc": 0.7607628482276069,
-              "ap": 0.04495669996590298,
-              "recall": 0.0471841704718417,
-              "n": 657
-            }
-          },
-          "wall_seconds": 1.128405421000025
-        },
-        {
-          "agg_auc": 0.5762254794713167,
-          "agg_ap": 0.015292830029079017,
-          "agg_precision": 0.005050505050505051,
-          "agg_recall": 0.004319654427645789,
-          "per_type": {
-            "policy": {
-              "auc": 0.8239911410986067,
-              "ap": 0.002709258631092198,
-              "recall": 0.06666666666666667,
-              "n": 15
-            },
-            "contextual": {
-              "auc": 0.6595282455859449,
-              "ap": 0.001977434891083528,
-              "recall": 0.0,
-              "n": 46
-            },
-            "lateral": {
-              "auc": 0.45903733994407614,
-              "ap": 0.004324486070299493,
-              "recall": 0.005263157894736842,
-              "n": 190
-            },
-            "cred-theft": {
-              "auc": 0.660620368476266,
-              "ap": 0.01035771458490793,
-              "recall": 0.0,
-              "n": 212
-            },
-            "benign-denied": {
-              "auc": 0.8701356637825434,
-              "ap": 0.09139521688230048,
-              "recall": 0.032577903682719546,
-              "n": 706
-            }
-          },
-          "wall_seconds": 1.1167066169998634
-        },
-        {
-          "agg_auc": 0.6436118111919705,
-          "agg_ap": 0.03128067026850411,
-          "agg_precision": 0.033707865168539325,
-          "agg_recall": 0.02120141342756184,
-          "per_type": {
-            "policy": {
-              "auc": 0.7211304383054106,
-              "ap": 0.0025185657063249256,
-              "recall": 0.07142857142857142,
-              "n": 14
-            },
-            "contextual": {
-              "auc": 0.7327556272317244,
-              "ap": 0.005117157987916981,
-              "recall": 0.0,
-              "n": 81
-            },
-            "lateral": {
-              "auc": 0.5502917493791195,
-              "ap": 0.007157459426456158,
-              "recall": 0.008888888888888889,
-              "n": 225
-            },
-            "cred-theft": {
-              "auc": 0.7035497659109207,
-              "ap": 0.026487879014149913,
-              "recall": 0.036585365853658534,
-              "n": 246
-            },
-            "benign-denied": {
-              "auc": 0.7350531528058482,
-              "ap": 0.047367281537069865,
-              "recall": 0.04186046511627907,
-              "n": 645
-            }
-          },
-          "wall_seconds": 1.1206310329998814
-        },
-        {
-          "agg_auc": 0.5936963191092072,
-          "agg_ap": 0.028135431160753926,
-          "agg_precision": 0.04597701149425287,
-          "agg_recall": 0.037383177570093455,
-          "per_type": {
-            "policy": {
-              "auc": 0.7356575907886254,
-              "ap": 0.0032051701613426465,
-              "recall": 0.043478260869565216,
-              "n": 23
-            },
-            "contextual": {
-              "auc": 0.6903440805731379,
-              "ap": 0.011834389383714176,
-              "recall": 0.039473684210526314,
-              "n": 76
-            },
-            "lateral": {
-              "auc": 0.48658107994547906,
-              "ap": 0.005988801310053492,
-              "recall": 0.013452914798206279,
-              "n": 223
-            },
-            "cred-theft": {
-              "auc": 0.665599669543897,
-              "ap": 0.02144463116061484,
-              "recall": 0.06103286384976526,
-              "n": 213
-            },
-            "benign-denied": {
-              "auc": 0.772716137232023,
-              "ap": 0.057408921216292826,
-              "recall": 0.04538087520259319,
-              "n": 617
-            }
-          },
-          "wall_seconds": 1.1276730690001386
-        },
-        {
-          "agg_auc": 0.6707729094940721,
-          "agg_ap": 0.030786269515603617,
-          "agg_precision": 0.03888888888888889,
-          "agg_recall": 0.029914529914529916,
-          "per_type": {
-            "policy": {
-              "auc": 0.9123932880331924,
-              "ap": 0.0033923548110774524,
-              "recall": 0.0,
-              "n": 14
-            },
-            "contextual": {
-              "auc": 0.7119330281362315,
-              "ap": 0.004675945857221567,
-              "recall": 0.0136986301369863,
-              "n": 73
-            },
-            "lateral": {
-              "auc": 0.5735554074766216,
-              "ap": 0.0060215483155687585,
-              "recall": 0.0,
-              "n": 155
-            },
-            "cred-theft": {
-              "auc": 0.7219886565031716,
-              "ap": 0.026275750173541643,
-              "recall": 0.05752212389380531,
-              "n": 226
-            },
-            "benign-denied": {
-              "auc": 0.8880529479542874,
-              "ap": 0.09656057137465757,
-              "recall": 0.05007587253414264,
-              "n": 659
-            }
-          },
-          "wall_seconds": 1.1069714690002002
-        }
-      ],
-      "ocsvm_noprec": [
-        {
-          "agg_auc": 0.5989882540055868,
-          "agg_ap": 0.12495814874651343,
-          "agg_precision": 0.0619150467962563,
-          "agg_recall": 0.16829745596868884,
-          "per_type": {
-            "policy": {
-              "auc": 0.6780024329468087,
-              "ap": 0.0014212398819859564,
-              "recall": 0.0,
-              "n": 21
-            },
-            "contextual": {
-              "auc": 0.9442746308139709,
-              "ap": 0.7067831909489762,
-              "recall": 0.9130434782608695,
-              "n": 69
-            },
-            "lateral": {
-              "auc": 0.42059047613744777,
-              "ap": 0.0044981667414665145,
-              "recall": 0.0,
-              "n": 222
-            },
-            "cred-theft": {
-              "auc": 0.6742583824561621,
-              "ap": 0.017158485778710836,
-              "recall": 0.11557788944723618,
-              "n": 199
-            },
-            "benign-denied": {
-              "auc": 0.6205306831629706,
-              "ap": 0.03046075901597891,
-              "recall": 0.0837138508371385,
-              "n": 657
-            }
-          },
-          "wall_seconds": 0.9008839819999821
-        },
-        {
-          "agg_auc": 0.5765602125378797,
-          "agg_ap": 0.08572865894100719,
-          "agg_precision": 0.12545454545454546,
-          "agg_recall": 0.1490280777537797,
-          "per_type": {
-            "policy": {
-              "auc": 0.6098598199033418,
-              "ap": 0.0014653513245183663,
-              "recall": 0.06666666666666667,
-              "n": 15
-            },
-            "contextual": {
-              "auc": 0.8856197368082203,
-              "ap": 0.5682303675716791,
-              "recall": 0.8043478260869565,
-              "n": 46
-            },
-            "lateral": {
-              "auc": 0.41531230473753333,
-              "ap": 0.003792930636797899,
-              "recall": 0.0,
-              "n": 190
-            },
-            "cred-theft": {
-              "auc": 0.6589329037342757,
-              "ap": 0.022027364723007998,
-              "recall": 0.14622641509433962,
-              "n": 212
-            },
-            "benign-denied": {
-              "auc": 0.7163795346771435,
-              "ap": 0.0676620008653476,
-              "recall": 0.14022662889518414,
-              "n": 706
-            }
-          },
-          "wall_seconds": 0.9000458339999113
-        },
-        {
-          "agg_auc": 0.651236507177265,
-          "agg_ap": 0.18626550265569738,
-          "agg_precision": 0.30462184873949577,
-          "agg_recall": 0.25618374558303886,
-          "per_type": {
-            "policy": {
-              "auc": 0.4998453169713063,
-              "ap": 0.001080553806268251,
-              "recall": 0.07142857142857142,
-              "n": 14
-            },
-            "contextual": {
-              "auc": 0.9688304148847086,
-              "ap": 0.776798780034927,
-              "recall": 0.9259259259259259,
-              "n": 81
-            },
-            "lateral": {
-              "auc": 0.5177661479056205,
-              "ap": 0.005995168704782136,
-              "recall": 0.013333333333333334,
-              "n": 225
-            },
-            "cred-theft": {
-              "auc": 0.6808451059065233,
-              "ap": 0.06658956270454365,
-              "recall": 0.2682926829268293,
-              "n": 246
-            },
-            "benign-denied": {
-              "auc": 0.6211483676044176,
-              "ap": 0.04400610868828045,
-              "recall": 0.06666666666666667,
-              "n": 645
-            }
-          },
-          "wall_seconds": 0.8917285519999041
-        },
-        {
-          "agg_auc": 0.6082223808864119,
-          "agg_ap": 0.16153490402761148,
-          "agg_precision": 0.2864450127877238,
-          "agg_recall": 0.20934579439252338,
-          "per_type": {
-            "policy": {
-              "auc": 0.5290586276054724,
-              "ap": 0.0018570166107727908,
-              "recall": 0.08695652173913043,
-              "n": 23
-            },
-            "contextual": {
-              "auc": 0.9805463127547039,
-              "ap": 0.7566155446322868,
-              "recall": 0.9210526315789473,
-              "n": 76
-            },
-            "lateral": {
-              "auc": 0.4426413442572085,
-              "ap": 0.0049916673123992115,
-              "recall": 0.004484304932735426,
-              "n": 223
-            },
-            "cred-theft": {
-              "auc": 0.6602492753749295,
-              "ap": 0.03614374329058378,
-              "recall": 0.18309859154929578,
-              "n": 213
-            },
-            "benign-denied": {
-              "auc": 0.6013209610193342,
-              "ap": 0.02971001706635193,
-              "recall": 0.03727714748784441,
-              "n": 617
-            }
-          },
-          "wall_seconds": 0.9106423819998781
-        },
-        {
-          "agg_auc": 0.6866279108734588,
-          "agg_ap": 0.18238140077813197,
-          "agg_precision": 0.25165562913907286,
-          "agg_recall": 0.24358974358974358,
-          "per_type": {
-            "policy": {
-              "auc": 0.7609155822440106,
-              "ap": 0.001981843834215015,
-              "recall": 0.14285714285714285,
-              "n": 14
-            },
-            "contextual": {
-              "auc": 0.9731309790328817,
-              "ap": 0.7701173255720224,
-              "recall": 0.9178082191780822,
-              "n": 73
-            },
-            "lateral": {
-              "auc": 0.5240221465599724,
-              "ap": 0.004141755935222388,
-              "recall": 0.0,
-              "n": 155
-            },
-            "cred-theft": {
-              "auc": 0.7055823262910377,
-              "ap": 0.048796551188983024,
-              "recall": 0.19911504424778761,
-              "n": 226
-            },
-            "benign-denied": {
-              "auc": 0.6618211274120266,
-              "ap": 0.06191282063401983,
-              "recall": 0.10925644916540213,
-              "n": 659
-            }
-          },
-          "wall_seconds": 0.892354363999857
-        }
-      ],
-      "gnn": [
-        {
-          "agg_auc": 0.7450592770787714,
-          "agg_ap": 0.18421131930332985,
-          "agg_precision": 0.20077972709551656,
-          "agg_recall": 0.20156555772994128,
-          "per_type": {
-            "policy": {
-              "auc": 0.8012494604351835,
-              "ap": 0.0021991772174154607,
-              "recall": 0.047619047619047616,
-              "n": 21
-            },
-            "contextual": {
-              "auc": 0.9928487934648251,
-              "ap": 0.849731075013834,
-              "recall": 0.9710144927536232,
-              "n": 69
-            },
-            "lateral": {
-              "auc": 0.7389325164162927,
-              "ap": 0.011175397427864527,
-              "recall": 0.013513513513513514,
-              "n": 222
-            },
-            "cred-theft": {
-              "auc": 0.6680104270839157,
-              "ap": 0.04402881229024362,
-              "recall": 0.16080402010050251,
-              "n": 199
-            },
-            "benign-denied": {
-              "auc": 0.7099932958679593,
-              "ap": 0.03212085240078998,
-              "recall": 0.0045662100456621,
-              "n": 657
-            }
-          },
-          "wall_seconds": 23.38579543000003
-        },
-        {
-          "agg_auc": 0.749887425350156,
-          "agg_ap": 0.13017674272374116,
-          "agg_precision": 0.15163934426229508,
-          "agg_recall": 0.23974082073434125,
-          "per_type": {
-            "policy": {
-              "auc": 0.8601898826538934,
-              "ap": 0.004621186787881091,
-              "recall": 0.26666666666666666,
-              "n": 15
-            },
-            "contextual": {
-              "auc": 0.9456927622820405,
-              "ap": 0.6072713351798691,
-              "recall": 0.8695652173913043,
-              "n": 46
-            },
-            "lateral": {
-              "auc": 0.7377559166645206,
-              "ap": 0.012675072459599862,
-              "recall": 0.11052631578947368,
-              "n": 190
-            },
-            "cred-theft": {
-              "auc": 0.7177245567755387,
-              "ap": 0.04037521210160521,
-              "recall": 0.2169811320754717,
-              "n": 212
-            },
-            "benign-denied": {
-              "auc": 0.7394715555013105,
-              "ap": 0.04309976784649563,
-              "recall": 0.0821529745042493,
-              "n": 706
-            }
-          },
-          "wall_seconds": 31.49334517300008
-        },
-        {
-          "agg_auc": 0.7458129708520441,
-          "agg_ap": 0.20369266830740887,
-          "agg_precision": 0.2589641434262948,
-          "agg_recall": 0.22968197879858657,
-          "per_type": {
-            "policy": {
-              "auc": 0.8831056669232441,
-              "ap": 0.003575143755044853,
-              "recall": 0.14285714285714285,
-              "n": 14
-            },
-            "contextual": {
-              "auc": 0.9816114979778217,
-              "ap": 0.8205693088461081,
-              "recall": 0.9506172839506173,
-              "n": 81
-            },
-            "lateral": {
-              "auc": 0.7473982028123666,
-              "ap": 0.01875937829880809,
-              "recall": 0.05333333333333334,
-              "n": 225
-            },
-            "cred-theft": {
-              "auc": 0.6670651641033929,
-              "ap": 0.04645036049376303,
-              "recall": 0.15853658536585366,
-              "n": 246
-            },
-            "benign-denied": {
-              "auc": 0.7516619932007416,
-              "ap": 0.06735104514789166,
-              "recall": 0.09457364341085271,
-              "n": 645
-            }
-          },
-          "wall_seconds": 30.22800535300007
-        },
-        {
-          "agg_auc": 0.761030796245579,
-          "agg_ap": 0.2175788147716455,
-          "agg_precision": 0.18172157279489903,
-          "agg_recall": 0.31962616822429907,
-          "per_type": {
-            "policy": {
-              "auc": 0.8070405952295681,
-              "ap": 0.003885412898889751,
-              "recall": 0.2608695652173913,
-              "n": 23
-            },
-            "contextual": {
-              "auc": 0.9984656800052024,
-              "ap": 0.8289872055632158,
-              "recall": 0.9868421052631579,
-              "n": 76
-            },
-            "lateral": {
-              "auc": 0.7268063502412068,
-              "ap": 0.020879441167647162,
-              "recall": 0.17937219730941703,
-              "n": 223
-            },
-            "cred-theft": {
-              "auc": 0.7109112148177368,
-              "ap": 0.05277963076623624,
-              "recall": 0.2347417840375587,
-              "n": 213
-            },
-            "benign-denied": {
-              "auc": 0.6505058613514936,
-              "ap": 0.024222877909328266,
-              "recall": 0.055105348460291734,
-              "n": 617
-            }
-          },
-          "wall_seconds": 29.41218825900023
-        },
-        {
-          "agg_auc": 0.8153609031220839,
-          "agg_ap": 0.24873102016762008,
-          "agg_precision": 0.24493554327808473,
-          "agg_recall": 0.2841880341880342,
-          "per_type": {
-            "policy": {
-              "auc": 0.942016309520747,
-              "ap": 0.005126797105222932,
-              "recall": 0.21428571428571427,
-              "n": 14
-            },
-            "contextual": {
-              "auc": 0.9961719388990281,
-              "ap": 0.9015653279931267,
-              "recall": 0.958904109589041,
-              "n": 73
-            },
-            "lateral": {
-              "auc": 0.8578714971748365,
-              "ap": 0.02145078274983358,
-              "recall": 0.1032258064516129,
-              "n": 155
-            },
-            "cred-theft": {
-              "auc": 0.7289699222496494,
-              "ap": 0.06455780759145106,
-              "recall": 0.19469026548672566,
-              "n": 226
-            },
-            "benign-denied": {
-              "auc": 0.8119355988511985,
-              "ap": 0.0739850871129525,
-              "recall": 0.0622154779969651,
-              "n": 659
-            }
-          },
-          "wall_seconds": 30.25224437299994
-        }
-      ],
-      "tgn_2node": [
-        {
-          "agg_auc": 0.6321519644376676,
-          "agg_ap": 0.12928512940987325,
-          "agg_precision": 0.035790031813361614,
-          "agg_recall": 0.26418786692759294,
-          "per_type": {
-            "policy": {
-              "auc": 0.7861165067592756,
-              "ap": 0.0029186377984016347,
-              "recall": 0.38095238095238093,
-              "n": 21
-            },
-            "contextual": {
-              "auc": 0.9622073234087531,
-              "ap": 0.7508735799182067,
-              "recall": 0.9420289855072463,
-              "n": 69
-            },
-            "lateral": {
-              "auc": 0.6358733579067325,
-              "ap": 0.00881173004418987,
-              "recall": 0.16216216216216217,
-              "n": 222
-            },
-            "cred-theft": {
-              "auc": 0.5059736776175894,
-              "ap": 0.006677850247483331,
-              "recall": 0.1306532663316583,
-              "n": 199
-            },
-            "benign-denied": {
-              "auc": 0.7308526163361322,
-              "ap": 0.05008288375780315,
-              "recall": 0.3074581430745814,
-              "n": 657
-            }
-          },
-          "wall_seconds": 549.0751359759998
-        },
-        {
-          "agg_auc": 0.639684258903722,
-          "agg_ap": 0.06988537883001342,
-          "agg_precision": 0.032106782106782104,
-          "agg_recall": 0.19222462203023757,
-          "per_type": {
-            "policy": {
-              "auc": 0.8824049513704686,
-              "ap": 0.005427469513362465,
-              "recall": 0.4666666666666667,
-              "n": 15
-            },
-            "contextual": {
-              "auc": 0.9542745430869332,
-              "ap": 0.5033612699539163,
-              "recall": 0.8913043478260869,
-              "n": 46
-            },
-            "lateral": {
-              "auc": 0.6423324283772189,
-              "ap": 0.00743028711205819,
-              "recall": 0.11578947368421053,
-              "n": 190
-            },
-            "cred-theft": {
-              "auc": 0.5658183526777623,
-              "ap": 0.00659821774249114,
-              "recall": 0.08962264150943396,
-              "n": 212
-            },
-            "benign-denied": {
-              "auc": 0.844419301391962,
-              "ap": 0.10791479677130938,
-              "recall": 0.41359773371104813,
-              "n": 706
-            }
-          },
-          "wall_seconds": 484.89707352899995
-        },
-        {
-          "agg_auc": 0.6307089844264542,
-          "agg_ap": 0.130021603704664,
-          "agg_precision": 0.034025629695095004,
-          "agg_recall": 0.27208480565371024,
-          "per_type": {
-            "policy": {
-              "auc": 0.8803821407394584,
-              "ap": 0.0017193686522835908,
-              "recall": 0.5714285714285714,
-              "n": 14
-            },
-            "contextual": {
-              "auc": 0.9795248684796407,
-              "ap": 0.7593241841716893,
-              "recall": 0.9506172839506173,
-              "n": 81
-            },
-            "lateral": {
-              "auc": 0.589742452757225,
-              "ap": 0.007344465409034245,
-              "recall": 0.1511111111111111,
-              "n": 225
-            },
-            "cred-theft": {
-              "auc": 0.550891974025827,
-              "ap": 0.007309685790934131,
-              "recall": 0.14227642276422764,
-              "n": 246
-            },
-            "benign-denied": {
-              "auc": 0.8277142424898292,
-              "ap": 0.08854820925776596,
-              "recall": 0.47131782945736433,
-              "n": 645
-            }
-          },
-          "wall_seconds": 493.23494746100005
-        },
-        {
-          "agg_auc": 0.6121826627403202,
-          "agg_ap": 0.13862175120701706,
-          "agg_precision": 0.03843560350640594,
-          "agg_recall": 0.2130841121495327,
-          "per_type": {
-            "policy": {
-              "auc": 0.8985510977007378,
-              "ap": 0.008203045145352968,
-              "recall": 0.5652173913043478,
-              "n": 23
-            },
-            "contextual": {
-              "auc": 0.9777510052674933,
-              "ap": 0.7689804927433697,
-              "recall": 0.9473684210526315,
-              "n": 76
-            },
-            "lateral": {
-              "auc": 0.5602023247094805,
-              "ap": 0.0066687405348859405,
-              "recall": 0.05829596412556054,
-              "n": 223
-            },
-            "cred-theft": {
-              "auc": 0.5175873852394985,
-              "ap": 0.010006474121919604,
-              "recall": 0.07511737089201878,
-              "n": 213
-            },
-            "benign-denied": {
-              "auc": 0.8456711308371538,
-              "ap": 0.08492574971017497,
-              "recall": 0.419773095623987,
-              "n": 617
-            }
-          },
-          "wall_seconds": 489.8918058530003
-        },
-        {
-          "agg_auc": 0.6110948416991623,
-          "agg_ap": 0.13961090261363407,
-          "agg_precision": 0.03256238587948874,
-          "agg_recall": 0.22863247863247863,
-          "per_type": {
-            "policy": {
-              "auc": 0.9343319454193326,
-              "ap": 0.007727413041553878,
-              "recall": 0.5,
-              "n": 14
-            },
-            "contextual": {
-              "auc": 0.974409466161145,
-              "ap": 0.7673636679776228,
-              "recall": 0.9178082191780822,
-              "n": 73
-            },
-            "lateral": {
-              "auc": 0.5578831978079154,
-              "ap": 0.005039287129613896,
-              "recall": 0.0967741935483871,
-              "n": 155
-            },
-            "cred-theft": {
-              "auc": 0.5222035723773969,
-              "ap": 0.0064042070726706875,
-              "recall": 0.07964601769911504,
-              "n": 226
-            },
-            "benign-denied": {
-              "auc": 0.8908180707675479,
-              "ap": 0.1400631584987055,
-              "recall": 0.5538694992412747,
-              "n": 659
-            }
-          },
-          "wall_seconds": 481.12275651300024
-        }
-      ]
-    },
-    "summary": {
-      "iforest_noprec": {
-        "agg_auc": {
-          "mean": 0.6135896414383694,
-          "std": 0.04141244261891167,
-          "vals": [
-            0.5836416879252806,
-            0.5762254794713167,
-            0.6436118111919705,
-            0.5936963191092072,
-            0.6707729094940721
-          ]
-        },
-        "agg_ap": {
-          "mean": 0.02506950555050396,
-          "std": 0.00713200876022722,
-          "vals": [
-            0.019852326778579128,
-            0.015292830029079017,
-            0.03128067026850411,
-            0.028135431160753926,
-            0.030786269515603617
-          ]
-        },
-        "agg_recall_global": {
-          "mean": 0.02443459655524604,
-          "std": 0.01261905663150052,
-          "vals": [
-            0.029354207436399216,
-            0.004319654427645789,
-            0.02120141342756184,
-            0.037383177570093455,
-            0.029914529914529916
-          ]
-        },
-        "agg_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "lat_auc": {
-          "mean": 0.505500506114361,
-          "std": 0.05340244461992998,
-          "vals": [
-            0.4580369538265088,
-            0.45903733994407614,
-            0.5502917493791195,
-            0.48658107994547906,
-            0.5735554074766216
-          ]
-        },
-        "lat_ap": {
-          "mean": 0.005668576501891505,
-          "std": 0.0011090075148890014,
-          "vals": [
-            0.004850587387079623,
-            0.004324486070299493,
-            0.007157459426456158,
-            0.005988801310053492,
-            0.0060215483155687585
-          ]
-        },
-        "lat_recall_global": {
-          "mean": 0.007322794118168205,
-          "std": 0.005018460125146753,
-          "vals": [
-            0.009009009009009009,
-            0.005263157894736842,
-            0.008888888888888889,
-            0.013452914798206279,
-            0.0
-          ]
-        },
-        "lat_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "theft_auc": {
-          "mean": 0.6905274498414253,
-          "std": 0.026374069672903677,
-          "vals": [
-            0.7008787887728714,
-            0.660620368476266,
-            0.7035497659109207,
-            0.665599669543897,
-            0.7219886565031716
-          ]
-        },
-        "theft_ap": {
-          "mean": 0.021037726494992415,
-          "std": 0.006548693812156754,
-          "vals": [
-            0.02062265754174774,
-            0.01035771458490793,
-            0.026487879014149913,
-            0.02144463116061484,
-            0.026275750173541643
-          ]
-        },
-        "theft_recall_global": {
-          "mean": 0.04308837222698351,
-          "std": 0.026103289577497656,
-          "vals": [
-            0.06030150753768844,
-            0.0,
-            0.036585365853658534,
-            0.06103286384976526,
-            0.05752212389380531
-          ]
-        },
-        "theft_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "policy_auc": {
-          "mean": 0.799123876933687,
-          "std": 0.07676315672577717,
-          "vals": [
-            0.8024469264426002,
-            0.8239911410986067,
-            0.7211304383054106,
-            0.7356575907886254,
-            0.9123932880331924
-          ]
-        },
-        "policy_ap": {
-          "mean": 0.0029034973546516493,
-          "std": 0.0003743534941183547,
-          "vals": [
-            0.0026921374634210258,
-            0.002709258631092198,
-            0.0025185657063249256,
-            0.0032051701613426465,
-            0.0033923548110774524
-          ]
-        },
-        "policy_recall_global": {
-          "mean": 0.045838509316770186,
-          "std": 0.02827796599492231,
-          "vals": [
-            0.047619047619047616,
-            0.06666666666666667,
-            0.07142857142857142,
-            0.043478260869565216,
-            0.0
-          ]
-        },
-        "policy_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "ctx_auc": {
-          "mean": 0.6823339745489602,
-          "std": 0.04543407751935309,
-          "vals": [
-            0.6171088912177616,
-            0.6595282455859449,
-            0.7327556272317244,
-            0.6903440805731379,
-            0.7119330281362315
-          ]
-        },
-        "ctx_ap": {
-          "mean": 0.005220372137772959,
-          "std": 0.003936560755799612,
-          "vals": [
-            0.0024969325689285452,
-            0.001977434891083528,
-            0.005117157987916981,
-            0.011834389383714176,
-            0.004675945857221567
-          ]
-        },
-        "ctx_recall_global": {
-          "mean": 0.010634462869502523,
-          "std": 0.017178221751451492,
-          "vals": [
-            0.0,
-            0.0,
-            0.0,
-            0.039473684210526314,
-            0.0136986301369863
-          ]
-        },
-        "ctx_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        }
-      },
-      "ocsvm_noprec": {
-        "agg_auc": {
-          "mean": 0.6243270530961205,
-          "std": 0.04412652791118497,
-          "vals": [
-            0.5989882540055868,
-            0.5765602125378797,
-            0.651236507177265,
-            0.6082223808864119,
-            0.6866279108734588
-          ]
-        },
-        "agg_ap": {
-          "mean": 0.1481737230297923,
-          "std": 0.04253827384842436,
-          "vals": [
-            0.12495814874651343,
-            0.08572865894100719,
-            0.18626550265569738,
-            0.16153490402761148,
-            0.18238140077813197
-          ]
-        },
-        "agg_recall_global": {
-          "mean": 0.2052889634575549,
-          "std": 0.04638789004158777,
-          "vals": [
-            0.16829745596868884,
-            0.1490280777537797,
-            0.25618374558303886,
-            0.20934579439252338,
-            0.24358974358974358
-          ]
-        },
-        "agg_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "lat_auc": {
-          "mean": 0.46406648391955657,
-          "std": 0.05292566779172808,
-          "vals": [
-            0.42059047613744777,
-            0.41531230473753333,
-            0.5177661479056205,
-            0.4426413442572085,
-            0.5240221465599724
-          ]
-        },
-        "lat_ap": {
-          "mean": 0.004683937866133629,
-          "std": 0.0008567948651831792,
-          "vals": [
-            0.0044981667414665145,
-            0.003792930636797899,
-            0.005995168704782136,
-            0.0049916673123992115,
-            0.004141755935222388
-          ]
-        },
-        "lat_recall_global": {
-          "mean": 0.003563527653213752,
-          "std": 0.0057964023719768954,
-          "vals": [
-            0.0,
-            0.0,
-            0.013333333333333334,
-            0.004484304932735426,
-            0.0
-          ]
-        },
-        "lat_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "theft_auc": {
-          "mean": 0.6759735987525856,
-          "std": 0.018980186562128586,
-          "vals": [
-            0.6742583824561621,
-            0.6589329037342757,
-            0.6808451059065233,
-            0.6602492753749295,
-            0.7055823262910377
-          ]
-        },
-        "theft_ap": {
-          "mean": 0.03814314153716586,
-          "std": 0.020166591478323212,
-          "vals": [
-            0.017158485778710836,
-            0.022027364723007998,
-            0.06658956270454365,
-            0.03614374329058378,
-            0.048796551188983024
-          ]
-        },
-        "theft_recall_global": {
-          "mean": 0.1824621246530977,
-          "std": 0.05794639143427586,
-          "vals": [
-            0.11557788944723618,
-            0.14622641509433962,
-            0.2682926829268293,
-            0.18309859154929578,
-            0.19911504424778761
-          ]
-        },
-        "theft_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "policy_auc": {
-          "mean": 0.615536355934188,
-          "std": 0.10715895584866544,
-          "vals": [
-            0.6780024329468087,
-            0.6098598199033418,
-            0.4998453169713063,
-            0.5290586276054724,
-            0.7609155822440106
-          ]
-        },
-        "policy_ap": {
-          "mean": 0.001561201091552076,
-          "std": 0.00036202391814670157,
-          "vals": [
-            0.0014212398819859564,
-            0.0014653513245183663,
-            0.001080553806268251,
-            0.0018570166107727908,
-            0.001981843834215015
-          ]
-        },
-        "policy_recall_global": {
-          "mean": 0.07358178053830228,
-          "std": 0.05109964056407481,
-          "vals": [
-            0.0,
-            0.06666666666666667,
-            0.07142857142857142,
-            0.08695652173913043,
-            0.14285714285714285
-          ]
-        },
-        "policy_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "ctx_auc": {
-          "mean": 0.950480414858897,
-          "std": 0.038727083828484846,
-          "vals": [
-            0.9442746308139709,
-            0.8856197368082203,
-            0.9688304148847086,
-            0.9805463127547039,
-            0.9731309790328817
-          ]
-        },
-        "ctx_ap": {
-          "mean": 0.7157090417519785,
-          "std": 0.08688381552417375,
-          "vals": [
-            0.7067831909489762,
-            0.5682303675716791,
-            0.776798780034927,
-            0.7566155446322868,
-            0.7701173255720224
-          ]
-        },
-        "ctx_recall_global": {
-          "mean": 0.8964356162061563,
-          "std": 0.05169247078176355,
-          "vals": [
-            0.9130434782608695,
-            0.8043478260869565,
-            0.9259259259259259,
-            0.9210526315789473,
-            0.9178082191780822
-          ]
-        },
-        "ctx_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        }
-      },
-      "gnn": {
-        "agg_auc": {
-          "mean": 0.7634302745297269,
-          "std": 0.029722968316391006,
-          "vals": [
-            0.7450592770787714,
-            0.749887425350156,
-            0.7458129708520441,
-            0.761030796245579,
-            0.8153609031220839
-          ]
-        },
-        "agg_ap": {
-          "mean": 0.1968781130547491,
-          "std": 0.044082881198076074,
-          "vals": [
-            0.18421131930332985,
-            0.13017674272374116,
-            0.20369266830740887,
-            0.2175788147716455,
-            0.24873102016762008
-          ]
-        },
-        "agg_recall_global": {
-          "mean": 0.2549605119350405,
-          "std": 0.046790916673831714,
-          "vals": [
-            0.20156555772994128,
-            0.23974082073434125,
-            0.22968197879858657,
-            0.31962616822429907,
-            0.2841880341880342
-          ]
-        },
-        "agg_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "lat_auc": {
-          "mean": 0.7617528966618445,
-          "std": 0.05422805664589527,
-          "vals": [
-            0.7389325164162927,
-            0.7377559166645206,
-            0.7473982028123666,
-            0.7268063502412068,
-            0.8578714971748365
-          ]
-        },
-        "lat_ap": {
-          "mean": 0.016988014420750642,
-          "std": 0.004758813348416221,
-          "vals": [
-            0.011175397427864527,
-            0.012675072459599862,
-            0.01875937829880809,
-            0.020879441167647162,
-            0.02145078274983358
-          ]
-        },
-        "lat_recall_global": {
-          "mean": 0.09199423327947008,
-          "std": 0.06276620005171032,
-          "vals": [
-            0.013513513513513514,
-            0.11052631578947368,
-            0.05333333333333334,
-            0.17937219730941703,
-            0.1032258064516129
-          ]
-        },
-        "lat_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "theft_auc": {
-          "mean": 0.6985362570060467,
-          "std": 0.029024965073049632,
-          "vals": [
-            0.6680104270839157,
-            0.7177245567755387,
-            0.6670651641033929,
-            0.7109112148177368,
-            0.7289699222496494
-          ]
-        },
-        "theft_ap": {
-          "mean": 0.049638364648659825,
-          "std": 0.00948543322426674,
-          "vals": [
-            0.04402881229024362,
-            0.04037521210160521,
-            0.04645036049376303,
-            0.05277963076623624,
-            0.06455780759145106
-          ]
-        },
-        "theft_recall_global": {
-          "mean": 0.19315075741322246,
-          "std": 0.03370653741717159,
-          "vals": [
-            0.16080402010050251,
-            0.2169811320754717,
-            0.15853658536585366,
-            0.2347417840375587,
-            0.19469026548672566
-          ]
-        },
-        "theft_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "policy_auc": {
-          "mean": 0.8587203829525272,
-          "std": 0.058113510220618496,
-          "vals": [
-            0.8012494604351835,
-            0.8601898826538934,
-            0.8831056669232441,
-            0.8070405952295681,
-            0.942016309520747
-          ]
-        },
-        "policy_ap": {
-          "mean": 0.0038815435528908176,
-          "std": 0.0011204888240587136,
-          "vals": [
-            0.0021991772174154607,
-            0.004621186787881091,
-            0.003575143755044853,
-            0.003885412898889751,
-            0.005126797105222932
-          ]
-        },
-        "policy_recall_global": {
-          "mean": 0.18645962732919255,
-          "std": 0.09208987777913633,
-          "vals": [
-            0.047619047619047616,
-            0.26666666666666666,
-            0.14285714285714285,
-            0.2608695652173913,
-            0.21428571428571427
-          ]
-        },
-        "policy_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "ctx_auc": {
-          "mean": 0.9829581345257836,
-          "std": 0.02181418761675592,
-          "vals": [
-            0.9928487934648251,
-            0.9456927622820405,
-            0.9816114979778217,
-            0.9984656800052024,
-            0.9961719388990281
-          ]
-        },
-        "ctx_ap": {
-          "mean": 0.8016248505192308,
-          "std": 0.11311850840209005,
-          "vals": [
-            0.849731075013834,
-            0.6072713351798691,
-            0.8205693088461081,
-            0.8289872055632158,
-            0.9015653279931267
-          ]
-        },
-        "ctx_recall_global": {
-          "mean": 0.9473886417895487,
-          "std": 0.04559131531266318,
-          "vals": [
-            0.9710144927536232,
-            0.8695652173913043,
-            0.9506172839506173,
-            0.9868421052631579,
-            0.958904109589041
-          ]
-        },
-        "ctx_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        }
-      },
-      "tgn_2node": {
-        "agg_auc": {
-          "mean": 0.6251645424414652,
-          "std": 0.012814764422095466,
-          "vals": [
-            0.6321519644376676,
-            0.639684258903722,
-            0.6307089844264542,
-            0.6121826627403202,
-            0.6110948416991623
-          ]
-        },
-        "agg_ap": {
-          "mean": 0.12148495315304035,
-          "std": 0.029233769488326997,
-          "vals": [
-            0.12928512940987325,
-            0.06988537883001342,
-            0.130021603704664,
-            0.13862175120701706,
-            0.13961090261363407
-          ]
-        },
-        "agg_recall_global": {
-          "mean": 0.2340427770787104,
-          "std": 0.033812783960535026,
-          "vals": [
-            0.26418786692759294,
-            0.19222462203023757,
-            0.27208480565371024,
-            0.2130841121495327,
-            0.22863247863247863
-          ]
-        },
-        "agg_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "lat_auc": {
-          "mean": 0.5972067523117145,
-          "std": 0.0403200272737721,
-          "vals": [
-            0.6358733579067325,
-            0.6423324283772189,
-            0.589742452757225,
-            0.5602023247094805,
-            0.5578831978079154
-          ]
-        },
-        "lat_ap": {
-          "mean": 0.007058902045956428,
-          "std": 0.0013713998056803895,
-          "vals": [
-            0.00881173004418987,
-            0.00743028711205819,
-            0.007344465409034245,
-            0.0066687405348859405,
-            0.005039287129613896
-          ]
-        },
-        "lat_recall_global": {
-          "mean": 0.11682658092628628,
-          "std": 0.04201116182054229,
-          "vals": [
-            0.16216216216216217,
-            0.11578947368421053,
-            0.1511111111111111,
-            0.05829596412556054,
-            0.0967741935483871
-          ]
-        },
-        "lat_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "theft_auc": {
-          "mean": 0.5324949923876148,
-          "std": 0.024901935106853356,
-          "vals": [
-            0.5059736776175894,
-            0.5658183526777623,
-            0.550891974025827,
-            0.5175873852394985,
-            0.5222035723773969
-          ]
-        },
-        "theft_ap": {
-          "mean": 0.007399286995099778,
-          "std": 0.001496480877788854,
-          "vals": [
-            0.006677850247483331,
-            0.00659821774249114,
-            0.007309685790934131,
-            0.010006474121919604,
-            0.0064042070726706875
-          ]
-        },
-        "theft_recall_global": {
-          "mean": 0.10346314383929074,
-          "std": 0.03085478580525641,
-          "vals": [
-            0.1306532663316583,
-            0.08962264150943396,
-            0.14227642276422764,
-            0.07511737089201878,
-            0.07964601769911504
-          ]
-        },
-        "theft_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "policy_auc": {
-          "mean": 0.8763573283978545,
-          "std": 0.054885786781885756,
-          "vals": [
-            0.7861165067592756,
-            0.8824049513704686,
-            0.8803821407394584,
-            0.8985510977007378,
-            0.9343319454193326
-          ]
-        },
-        "policy_ap": {
-          "mean": 0.005199186830190907,
-          "std": 0.00286257069670411,
-          "vals": [
-            0.0029186377984016347,
-            0.005427469513362465,
-            0.0017193686522835908,
-            0.008203045145352968,
-            0.007727413041553878
-          ]
-        },
-        "policy_recall_global": {
-          "mean": 0.4968530020703933,
-          "std": 0.07840484308549496,
-          "vals": [
-            0.38095238095238093,
-            0.4666666666666667,
-            0.5714285714285714,
-            0.5652173913043478,
-            0.5
-          ]
-        },
-        "policy_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        },
-        "ctx_auc": {
-          "mean": 0.969633441280793,
-          "std": 0.01092689996230403,
-          "vals": [
-            0.9622073234087531,
-            0.9542745430869332,
-            0.9795248684796407,
-            0.9777510052674933,
-            0.974409466161145
-          ]
-        },
-        "ctx_ap": {
-          "mean": 0.7099806389529609,
-          "std": 0.11572853633443,
-          "vals": [
-            0.7508735799182067,
-            0.5033612699539163,
-            0.7593241841716893,
-            0.7689804927433697,
-            0.7673636679776228
-          ]
-        },
-        "ctx_recall_global": {
-          "mean": 0.9298254515029327,
-          "std": 0.02508620946147715,
-          "vals": [
-            0.9420289855072463,
-            0.8913043478260869,
-            0.9506172839506173,
-            0.9473684210526315,
-            0.9178082191780822
-          ]
-        },
-        "ctx_recall_routed": {
-          "mean": NaN,
-          "std": NaN,
-          "vals": [
-            NaN,
-            NaN,
-            NaN,
-            NaN,
-            NaN
-          ]
-        }
-      }
-    }
-  },
-  "paired": {
-    "iforest_noprec": {
-      "lat_auc": {
-        "n_pairs": 5,
-        "mean_delta": 0.416,
-        "sd_delta": 0.041,
-        "ci95": [
-          0.385,
-          0.449
-        ],
-        "significant": true,
-        "tgn_better": true
-      },
-      "lat_ap": {
-        "n_pairs": 5,
-        "mean_delta": 0.267,
-        "sd_delta": 0.066,
-        "ci95": [
-          0.221,
-          0.319
-        ],
-        "significant": true,
-        "tgn_better": true
-      },
-      "theft_auc": {
-        "n_pairs": 5,
-        "mean_delta": -0.002,
-        "sd_delta": 0.083,
-        "ci95": [
-          -0.071,
-          0.055
-        ],
-        "significant": false,
-        "tgn_better": false
-      },
-      "theft_ap": {
-        "n_pairs": 5,
-        "mean_delta": 0.024,
-        "sd_delta": 0.015,
-        "ci95": [
-          0.012,
-          0.035
-        ],
-        "significant": true,
-        "tgn_better": true
-      },
+  "paired_full_minus_variant": {
+    "no_config": {
       "agg_auc": {
-        "n_pairs": 5,
-        "mean_delta": 0.209,
-        "sd_delta": 0.064,
+        "n_pairs": 1,
+        "mean_delta": 0.006,
+        "sd_delta": NaN,
         "ci95": [
-          0.156,
-          0.25
+          NaN,
+          NaN
         ],
-        "significant": true,
-        "tgn_better": true
+        "significant": false
       },
       "agg_ap": {
-        "n_pairs": 5,
-        "mean_delta": 0.229,
-        "sd_delta": 0.045,
+        "n_pairs": 1,
+        "mean_delta": -0.007,
+        "sd_delta": NaN,
         "ci95": [
-          0.201,
-          0.269
+          NaN,
+          NaN
         ],
-        "significant": true,
-        "tgn_better": true
-      }
-    },
-    "ocsvm_noprec": {
+        "significant": false
+      },
+      "agg_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.043,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "agg_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.176,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
       "lat_auc": {
-        "n_pairs": 5,
-        "mean_delta": 0.458,
-        "sd_delta": 0.039,
+        "n_pairs": 1,
+        "mean_delta": 0.107,
+        "sd_delta": NaN,
         "ci95": [
-          0.428,
-          0.488
+          NaN,
+          NaN
         ],
-        "significant": true,
-        "tgn_better": true
+        "significant": false
       },
       "lat_ap": {
-        "n_pairs": 5,
-        "mean_delta": 0.268,
-        "sd_delta": 0.066,
+        "n_pairs": 1,
+        "mean_delta": 0.065,
+        "sd_delta": NaN,
         "ci95": [
-          0.222,
-          0.32
+          NaN,
+          NaN
         ],
-        "significant": true,
-        "tgn_better": true
+        "significant": false
+      },
+      "lat_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.33,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "lat_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.285,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
       },
       "theft_auc": {
-        "n_pairs": 5,
-        "mean_delta": 0.012,
-        "sd_delta": 0.085,
+        "n_pairs": 1,
+        "mean_delta": -0.06,
+        "sd_delta": NaN,
         "ci95": [
-          -0.056,
-          0.072
+          NaN,
+          NaN
         ],
-        "significant": false,
-        "tgn_better": false
+        "significant": false
       },
       "theft_ap": {
-        "n_pairs": 5,
+        "n_pairs": 1,
+        "mean_delta": 0.002,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "theft_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.071,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "theft_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.065,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_auc": {
+        "n_pairs": 1,
+        "mean_delta": -0.001,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_ap": {
+        "n_pairs": 1,
+        "mean_delta": -0.135,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.067,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_auc": {
+        "n_pairs": 1,
+        "mean_delta": -0.006,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_ap": {
+        "n_pairs": 1,
+        "mean_delta": -0.072,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": -0.02,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.102,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_recall": {
+        "n_pairs": 1,
+        "mean_delta": 0.067,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_recall": {
+        "n_pairs": 1,
+        "mean_delta": 0.102,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "fpr_routed": {
+        "n_pairs": 1,
         "mean_delta": 0.007,
-        "sd_delta": 0.027,
+        "sd_delta": NaN,
         "ci95": [
-          -0.014,
-          0.029
+          NaN,
+          NaN
         ],
-        "significant": false,
-        "tgn_better": false
-      },
-      "agg_auc": {
-        "n_pairs": 5,
-        "mean_delta": 0.198,
-        "sd_delta": 0.065,
-        "ci95": [
-          0.142,
-          0.237
-        ],
-        "significant": true,
-        "tgn_better": true
-      },
-      "agg_ap": {
-        "n_pairs": 5,
-        "mean_delta": 0.106,
-        "sd_delta": 0.043,
-        "ci95": [
-          0.073,
-          0.139
-        ],
-        "significant": true,
-        "tgn_better": true
+        "significant": false
       }
     },
-    "gnn": {
-      "lat_auc": {
-        "n_pairs": 5,
-        "mean_delta": 0.16,
-        "sd_delta": 0.047,
-        "ci95": [
-          0.119,
-          0.19
-        ],
-        "significant": true,
-        "tgn_better": true
-      },
-      "lat_ap": {
-        "n_pairs": 5,
-        "mean_delta": 0.256,
-        "sd_delta": 0.066,
-        "ci95": [
-          0.209,
-          0.309
-        ],
-        "significant": true,
-        "tgn_better": true
-      },
-      "theft_auc": {
-        "n_pairs": 5,
-        "mean_delta": -0.011,
-        "sd_delta": 0.101,
-        "ci95": [
-          -0.087,
-          0.066
-        ],
-        "significant": false,
-        "tgn_better": false
-      },
-      "theft_ap": {
-        "n_pairs": 5,
-        "mean_delta": -0.005,
-        "sd_delta": 0.019,
-        "ci95": [
-          -0.019,
-          0.009
-        ],
-        "significant": false,
-        "tgn_better": false
-      },
+    "no_precursor": {
       "agg_auc": {
-        "n_pairs": 5,
-        "mean_delta": 0.059,
-        "sd_delta": 0.068,
+        "n_pairs": 1,
+        "mean_delta": 0.019,
+        "sd_delta": NaN,
         "ci95": [
-          0.005,
-          0.109
+          NaN,
+          NaN
         ],
-        "significant": true,
-        "tgn_better": true
+        "significant": false
       },
       "agg_ap": {
-        "n_pairs": 5,
-        "mean_delta": 0.058,
-        "sd_delta": 0.059,
+        "n_pairs": 1,
+        "mean_delta": 0.007,
+        "sd_delta": NaN,
         "ci95": [
-          0.013,
-          0.103
+          NaN,
+          NaN
         ],
-        "significant": true,
-        "tgn_better": true
+        "significant": false
+      },
+      "agg_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": -0.007,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "agg_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": -0.007,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "lat_auc": {
+        "n_pairs": 1,
+        "mean_delta": 0.081,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "lat_ap": {
+        "n_pairs": 1,
+        "mean_delta": 0.023,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "lat_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.045,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "lat_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.025,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "theft_auc": {
+        "n_pairs": 1,
+        "mean_delta": 0.034,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "theft_ap": {
+        "n_pairs": 1,
+        "mean_delta": -0.002,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "theft_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": -0.047,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "theft_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": -0.053,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_auc": {
+        "n_pairs": 1,
+        "mean_delta": 0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_ap": {
+        "n_pairs": 1,
+        "mean_delta": 0.09,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_auc": {
+        "n_pairs": 1,
+        "mean_delta": 0.011,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_ap": {
+        "n_pairs": 1,
+        "mean_delta": 0.035,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.02,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_recall": {
+        "n_pairs": 1,
+        "mean_delta": 0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_recall": {
+        "n_pairs": 1,
+        "mean_delta": 0.02,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "fpr_routed": {
+        "n_pairs": 1,
+        "mean_delta": -0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
       }
     },
-    "tgn_2node": {
-      "lat_auc": {
-        "n_pairs": 5,
-        "mean_delta": 0.325,
-        "sd_delta": 0.051,
-        "ci95": [
-          0.282,
-          0.362
-        ],
-        "significant": true,
-        "tgn_better": true
-      },
-      "lat_ap": {
-        "n_pairs": 5,
-        "mean_delta": 0.266,
-        "sd_delta": 0.067,
-        "ci95": [
-          0.218,
-          0.318
-        ],
-        "significant": true,
-        "tgn_better": true
-      },
-      "theft_auc": {
-        "n_pairs": 5,
-        "mean_delta": 0.156,
-        "sd_delta": 0.081,
-        "ci95": [
-          0.095,
-          0.216
-        ],
-        "significant": true,
-        "tgn_better": true
-      },
-      "theft_ap": {
-        "n_pairs": 5,
-        "mean_delta": 0.037,
-        "sd_delta": 0.016,
-        "ci95": [
-          0.025,
-          0.049
-        ],
-        "significant": true,
-        "tgn_better": true
-      },
+    "no_hist": {
       "agg_auc": {
-        "n_pairs": 5,
-        "mean_delta": 0.197,
-        "sd_delta": 0.045,
+        "n_pairs": 1,
+        "mean_delta": 0.028,
+        "sd_delta": NaN,
         "ci95": [
-          0.163,
-          0.231
+          NaN,
+          NaN
         ],
-        "significant": true,
-        "tgn_better": true
+        "significant": false
       },
       "agg_ap": {
-        "n_pairs": 5,
-        "mean_delta": 0.133,
-        "sd_delta": 0.048,
+        "n_pairs": 1,
+        "mean_delta": 0.029,
+        "sd_delta": NaN,
         "ci95": [
-          0.099,
-          0.172
+          NaN,
+          NaN
         ],
-        "significant": true,
-        "tgn_better": true
+        "significant": false
+      },
+      "agg_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.045,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "agg_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.066,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "lat_auc": {
+        "n_pairs": 1,
+        "mean_delta": 0.045,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "lat_ap": {
+        "n_pairs": 1,
+        "mean_delta": 0.036,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "lat_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.195,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "lat_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.25,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "theft_auc": {
+        "n_pairs": 1,
+        "mean_delta": 0.143,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "theft_ap": {
+        "n_pairs": 1,
+        "mean_delta": 0.005,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "theft_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.088,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "theft_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.065,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_auc": {
+        "n_pairs": 1,
+        "mean_delta": -0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_ap": {
+        "n_pairs": 1,
+        "mean_delta": 0.158,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_auc": {
+        "n_pairs": 1,
+        "mean_delta": 0.007,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_ap": {
+        "n_pairs": 1,
+        "mean_delta": -0.028,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_recall_global": {
+        "n_pairs": 1,
+        "mean_delta": 0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_recall_routed": {
+        "n_pairs": 1,
+        "mean_delta": -0.061,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "policy_recall": {
+        "n_pairs": 1,
+        "mean_delta": 0.0,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "ctx_recall": {
+        "n_pairs": 1,
+        "mean_delta": -0.061,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
+      },
+      "fpr_routed": {
+        "n_pairs": 1,
+        "mean_delta": 0.006,
+        "sd_delta": NaN,
+        "ci95": [
+          NaN,
+          NaN
+        ],
+        "significant": false
       }
     }
-  },
-  "verdict_tgn_beats": {
-    "iforest_noprec": false,
-    "ocsvm_noprec": false,
-    "gnn": false,
-    "tgn_2node": true
   }
 }
