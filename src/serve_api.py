@@ -206,8 +206,13 @@ class ScoreOut(BaseModel):
 
 def _alarm(ev: "EventIn", score: float, is_anomaly: bool) -> bool:
     """:func:`event_alarm` of a scored request under the loaded arm threshold."""
-    return event_alarm(score, flagged=is_anomaly, threshold_arm=STATE.model.threshold_arm,
-                       features=ev.features)
+    return event_alarm(
+        score,
+        flagged=is_anomaly,
+        threshold_arm=STATE.model.threshold_arm,
+        features=ev.features,
+        arm_on_flag=getattr(STATE.model, "precursor_arm_on_flag", False),
+    )
 
 
 class OkOut(BaseModel):

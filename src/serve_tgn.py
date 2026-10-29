@@ -76,6 +76,9 @@ def build_model(hp: dict, device: torch.device) -> ZTATemporalGraphNetwork:
     # Kill-chain precursor knobs (serving-time, not in the state_dict); fallbacks = TGNConfig.
     model.precursor_half_life = float(hp.get("precursor_half_life", TGNConfig.precursor_half_life))
     model.precursor_max_shift = float(hp.get("precursor_max_shift", TGNConfig.precursor_max_shift))
+    model.precursor_arm_on_flag = bool(
+        hp.get("precursor_arm_on_flag", TGNConfig.precursor_arm_on_flag)
+    )
     # Plain-attribute toggles are not in the state_dict: restore them from hp
     # (default = TGNConfig.use_struct_head).
     model.use_struct_head = bool(hp.get("use_struct_head", TGNConfig.use_struct_head))
@@ -356,16 +359,23 @@ def sensor_alarm(features) -> bool:
     return len(features) > 1 and float(features[1]) > 0.5
 
 
-def event_alarm(score: float, *, flagged: bool, threshold_arm: float | None, features) -> bool:
+def event_alarm(
+    score: float,
+    *,
+    flagged: bool,
+    threshold_arm: float | None,
+    features,
+    arm_on_flag: bool = False,
+) -> bool:
     """Per-event alarm that arms the kill-chain precursor (see :func:`precursor_shift`).
 
-    True when the event was flagged (at or above its decision threshold), armed
-    (``score >= threshold_arm``: recon sits below the decision threshold, hence a lower
-    one) or its sensor fired; ``threshold_arm=None`` disables arming. One rule for the
-    offline replay and every serving path.
+    True when the event's sensor probe fired, when ``arm_on_flag`` is enabled and the event
+    was flagged (at or above its decision threshold), or when ``threshold_arm`` is set and
+    ``score >= threshold_arm``; ``threshold_arm=None`` disables score-threshold arming. One
+    rule for the offline replay and every serving path.
     """
     armed = threshold_arm is not None and score >= threshold_arm
-    return bool(flagged) or armed or sensor_alarm(features)
+    return (bool(arm_on_flag) and bool(flagged)) or armed or sensor_alarm(features)
 
 
 def signal_dirty(features) -> bool:
@@ -526,8 +536,13 @@ def score_event(
         eff_threshold = threshold_dirty
     is_anomaly = score >= eff_threshold
 
-    if update and event_alarm(score, flagged=is_anomaly, threshold_arm=model.threshold_arm,
-                              features=features):
+    if update and event_alarm(
+        score,
+        flagged=is_anomaly,
+        threshold_arm=model.threshold_arm,
+        features=features,
+        arm_on_flag=getattr(model, "precursor_arm_on_flag", False),
+    ):
         record_alert(model, boost_idx, timestamp)
 
     if update and not is_anomaly:

@@ -272,13 +272,17 @@ def _replay(model, source_nodes, device_nodes, user, dst, t, msg, y, device, *,
                         policy_allow is None or bool(policy_allow[i])) and (
                         quarantine_shift is None or shift < quarantine_shift)
 
-                # Calibration pass: no threshold yet, the label or the sensor arms the precursor.
+                # Calibration pass: no threshold yet, the sensor (or label when flag-arming) arms.
+                arm_on_flag = bool(getattr(model, "precursor_arm_on_flag", False))
                 if gate_by_label:
-                    alarm = lab == 1 or sensor_alarm(msg_row)
+                    alarm = (arm_on_flag and lab == 1) or sensor_alarm(msg_row)
                 else:
                     # Also arm on threshold_arm: recon sits below the decision threshold.
-                    alarm = event_alarm(score, flagged=eff_thr is not None and score >= eff_thr,
-                                        threshold_arm=threshold_arm, features=msg_row)
+                    alarm = event_alarm(
+                        score, flagged=eff_thr is not None and score >= eff_thr,
+                        threshold_arm=threshold_arm, features=msg_row,
+                        arm_on_flag=arm_on_flag,
+                    )
                 if alarm:
                     record_alert(model, actor, tv)  # arm the precursor (recon → lateral)
 
@@ -657,6 +661,7 @@ def train_tgn(cfg: TGNConfig | None = None, *, dataset: "StreamData | None" = No
     # Kill-chain precursor knobs (serving-time prior; see serve_tgn.precursor_shift).
     model.precursor_half_life = cfg.precursor_half_life
     model.precursor_max_shift = cfg.precursor_max_shift
+    model.precursor_arm_on_flag = cfg.precursor_arm_on_flag
     model.edge_combine = cfg.edge_combine
     if (use_struct_head != cfg.use_struct_head
             or not (use_hash_identity and use_hist_feats and use_precursor and use_config_node)):
@@ -743,31 +748,23 @@ def train_tgn(cfg: TGNConfig | None = None, *, dataset: "StreamData | None" = No
         has_src = p_source is not None
         has_config = p_config is not None and data.cfg_num > 0
 
-        def _corrupt(pos, rng, *, hard_ratio=None):
-            hr = cfg.binding_hard_ratio if hard_ratio is None else hard_ratio
+        def _corrupt(pos, rng):
             return _sample_structural_negatives(
                 P * K, rng[1], rng[0], device, avoid=pos.repeat_interleave(K),
-                hard_pool=pos, hard_ratio=hr, pool=rng[2],
+                hard_pool=pos, hard_ratio=cfg.binding_hard_ratio, pool=rng[2],
             )
 
         # (head, tail, tail negatives, head negatives | None), in the loss order.
         bind_edges = []
 
-        def _bind(head, tail, h_rng, t_rng, *, corrupt_head: bool = False, head_hard_ratio=None):
-            neg_h = (
-                _corrupt(head, h_rng, hard_ratio=head_hard_ratio)
-                if (cfg.head_negatives or corrupt_head) else None
-            )
+        def _bind(head, tail, h_rng, t_rng):
+            neg_h = _corrupt(head, h_rng) if cfg.head_negatives else None
             bind_edges.append((head, tail, _corrupt(tail, t_rng), neg_h))
 
         if has_bind:
             _bind(p_device, p_user, dev_rng, usr_rng)  # device → user
         if has_config:
-            _bind(
-                p_config, p_user, cfg_rng, usr_rng,
-                corrupt_head=cfg.cfg_user_head_negatives,
-                head_hard_ratio=(cfg.cfg_user_hard_ratio if cfg.cfg_user_head_negatives else None),
-            )  # config → user
+            _bind(p_config, p_user, cfg_rng, usr_rng)  # config → user
             if has_bind:
                 _bind(p_config, p_device, cfg_rng, dev_rng)  # config → device
             if has_src:
@@ -1458,10 +1455,9 @@ def train_tgn(cfg: TGNConfig | None = None, *, dataset: "StreamData | None" = No
             "edge_calibration": cfg.edge_calibration,
             "edge_combine": cfg.edge_combine,
             "head_negatives": cfg.head_negatives,
-            "cfg_user_head_negatives": cfg.cfg_user_head_negatives,
-            "cfg_user_hard_ratio": cfg.cfg_user_hard_ratio,
             "binding_hard_ratio": cfg.binding_hard_ratio,
             "mask_seen_negatives": cfg.mask_seen_negatives,
+            "precursor_arm_on_flag": cfg.precursor_arm_on_flag,
             "precursor_arm_on_score": cfg.precursor_arm_on_score,
         }
         op_new = operating_point(test_scores, test_labels, test_types, threshold)

@@ -111,7 +111,8 @@ def run_arm(name, cfg, data, out_dir):
 
 
 # ---------------------------------------------------------------- scalar re-simulation
-def simulate(comb, msg_rows, dirty, actor, t, *, thr, thr_dirty, thr_arm, half_life, max_shift):
+def simulate(comb, msg_rows, dirty, actor, t, *, thr, thr_dirty, thr_arm, half_life, max_shift,
+             arm_on_flag=False):
     """The phase-2 loop of ``train_tgn._replay`` on precomputed combined logits.
 
     Returns ``(scores, shifts)``. ``comb`` is float32 like the real run, so the per-event
@@ -128,7 +129,7 @@ def simulate(comb, msg_rows, dirty, actor, t, *, thr, thr_dirty, thr_arm, half_l
         scores[i] = sc
         eff = thr_dirty if (thr_dirty is not None and dirty[i]) else thr
         if event_alarm(sc, flagged=eff is not None and sc >= eff, threshold_arm=thr_arm,
-                       features=msg_rows[i]):
+                       features=msg_rows[i], arm_on_flag=arm_on_flag):
             record_alert(m, actor[i], t[i])
     return scores, shifts
 
@@ -150,7 +151,7 @@ class Split:
 
 def calibrate_and_test(val, test, cfg, half_life, max_shift):
     """Mirror of the calibration + test section of ``train_tgn`` for one precursor setting."""
-    kw = dict(half_life=half_life, max_shift=max_shift)
+    kw = dict(half_life=half_life, max_shift=max_shift, arm_on_flag=cfg.precursor_arm_on_flag)
     # Pass A: sensor-only arming, scores recomputed vectorised from the logits (as train_tgn does).
     _, shift_a = simulate(val.passes[0], val.rows, val.dirty, val.actor, val.t,
                           thr=None, thr_dirty=None, thr_arm=None, **kw)

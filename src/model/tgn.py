@@ -125,8 +125,9 @@ class ZTATemporalGraphNetwork(nn.Module):
 
         self.precursor_half_life = _Cfg.precursor_half_life
         self.precursor_max_shift = _Cfg.precursor_max_shift
+        self.precursor_arm_on_flag = _Cfg.precursor_arm_on_flag
         # Arm threshold of serve_tgn.event_alarm, fitted at calibration (stats file);
-        # None = arm on the decision alone.
+        # None = no score-threshold arming beyond sensor_alarm / precursor_arm_on_flag.
         self.threshold_arm = None
         # Δt cap / never-seen sentinel (config.delta_t_cap). Not a buffer, so a checkpoint
         # cannot override it.

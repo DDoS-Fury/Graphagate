@@ -160,17 +160,10 @@ class TGNConfig:
     infonce_k: int = 5
     # Binding edges also rank the true head above K corrupted heads (other device / client /
     # IP for the same tail): credential theft keeps the victim and swaps the attacker's
-    # context in, a head corruption the tail-only objective never sees. Off globally: with
+    # context in, a head corruption the tail-only objective never sees. Off: with
     # mask_seen_negatives the full run lost lateral AP 0.089 → 0.033 and the wiped-cookie FPR
     # rose 0.3% → 2.2% (a fresh device for a known user is a head corruption).
     head_negatives: bool = False
-    # Selective head corruption on ``config -> user`` alone (P(config | user) alongside
-    # P(user | config)): wiping a cookie or roaming changes device / IP, not the user's
-    # habitual browser JA3, whereas credential theft and new-tool lateral movement replace
-    # the client. Half of those corrupted configs come from the batch (popular fleet clients
-    # matching ``_fleet_config`` mimicry), half uniformly from the benign training pool.
-    cfg_user_head_negatives: bool = True
-    cfg_user_hard_ratio: float = 0.5
     # Share of binding-edge negatives (head and tail) drawn from the batch's endpoints:
     # frequency-weighted, like the popular fleet client a thief mimics. 0 = uniform (reference).
     binding_hard_ratio: float = 0.0
@@ -248,6 +241,12 @@ class TGNConfig:
     # Calibration replays after pass A refitting the decision thresholds (the precursor arm
     # threshold is frozen at pass A, so one pass is already self-consistent).
     calib_iters: int = 1
+    # Arm the kill-chain precursor on decision flags (``score >= eff_thr``) in addition to
+    # sensor probes. Off: benign OPA denials (role/clearance mismatch, ~1.6% of the stream)
+    # and the ~1% benign FP tail are flagged, which with a 72 h half-life arms >52% of benign
+    # devices — inflating benign scores above unarmed credential-theft devices and forcing the
+    # clean calibration threshold up. Sensor-only arming matches ``Pass A`` and the baselines.
+    precursor_arm_on_flag: bool = False
     # Arm the kill-chain precursor also on the score (>= the label-free 1%-FPR threshold),
     # besides sensor alarms and flagged events. Off: with a 72 h half-life it armed 61% (val)
     # / 70% (test) of benign events, so the shift acted as a global offset behind 95% of the

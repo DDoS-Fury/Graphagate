@@ -258,3 +258,30 @@ def test_api_infer_returns_alarm_and_deny_records_it():
         _assert_same(before, _baseline(model, reg))
     finally:
         st.model = st.registry = None
+
+
+def test_precursor_arm_on_flag_default_ignores_sensor_clean_flags(tmp_path):
+    """Default ``precursor_arm_on_flag=False`` does not arm ``recent_alert`` on sensor-clean
+    flagged requests (e.g. benign OPA denials), while Snort ``s1`` still arms; ``True``
+    restores flag-driven arming and survives ``save_model`` / ``load_model``."""
+    clean = [1.0, 0.0, 0.0, 0.0] + [0.5] * (MSG_DIM - 4)
+    snort = [1.0, 1.0, 0.0, 0.0] + [0.5] * (MSG_DIM - 4)
+    assert not event_alarm(0.99, flagged=True, threshold_arm=None, features=clean)
+    assert event_alarm(0.01, flagged=False, threshold_arm=None, features=snort)
+    assert event_alarm(0.99, flagged=True, threshold_arm=None, features=clean, arm_on_flag=True)
+
+    model, reg = _warmed()
+    model.recent_alert.clear()
+    ev = dict(key_user="u0", key_device="tpm:0", key_dst="/r/0", timestamp=T0, features=clean,
+              key_source="src:10.0.0.1", key_config="conf:0")
+    _, flagged, _ = score_event(model, reg, 0.0, device=DEVICE, update=True, **ev)
+    assert flagged and reg.get("tpm:0") not in model.recent_alert
+
+    hp = {**HP, "precursor_arm_on_flag": True}
+    ckpt, stats = tmp_path / "m.pt", tmp_path / "s.json"
+    model.precursor_arm_on_flag = True
+    save_model(model, reg, 0.0, hp, ckpt, stats)
+    loaded = load_model(ckpt, stats, DEVICE)[0]
+    assert loaded.precursor_arm_on_flag is True
+    score_event(loaded, reg, 0.0, device=DEVICE, update=True, **{**ev, "timestamp": T0 + 10})
+    assert loaded.recent_alert[reg.get("tpm:0")] == T0 + 10

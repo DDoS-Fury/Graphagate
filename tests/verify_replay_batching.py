@@ -105,8 +105,9 @@ def _replay_ref(model, source_nodes, device_nodes, user, dst, t, msg, y, device,
                           aux_pair=(dev, d) if dev is not None else None)
 
         snort_alert = msg_vec[1] > 0.5
+        arm_on_flag = bool(getattr(model, "precursor_arm_on_flag", False))
         is_anomaly = (score >= eff_thr) if not gate_by_label else (lab == 1)
-        if is_anomaly or snort_alert:
+        if (arm_on_flag and is_anomaly) or snort_alert:
             record_alert(model, actor, tv)
 
     return scores, labels
@@ -131,6 +132,7 @@ def _build_model(data, cfg, device):
     m.use_struct_head = m.use_hash_identity = m.use_hist_feats = m.use_precursor = True
     m.precursor_half_life = cfg.precursor_half_life
     m.precursor_max_shift = cfg.precursor_max_shift
+    m.precursor_arm_on_flag = cfg.precursor_arm_on_flag
     m.eval()
     return m
 
