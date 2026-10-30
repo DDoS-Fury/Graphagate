@@ -48,6 +48,20 @@ def main():
     k = KINDS[kind]
     src = Path(sys.argv[2]) if len(sys.argv) > 2 else k["src"]
     out = Path(sys.argv[3]) if len(sys.argv) > 3 else k["out"]
+
+    if kind == "ablation":
+        pd_json = ROOT / "tasks" / "runs" / "panelD.json"
+        if pd_json.exists():
+            import json
+            try:
+                meta = json.loads(pd_json.read_text()).get("meta", {})
+                n_seeds = len(meta.get("seeds", [1000]))
+                if n_seeds > 1:
+                    k["caption"] = (f"Component ablation on the held-out test split (mean $\\pm$ std over {n_seeds} seeds). "
+                                    "Each column switches one component off; recall@1\\%FPR uses a global threshold "
+                                    "calibrated on benign validation events.")
+            except Exception:
+                pass
     lines = src.read_text().splitlines()
     heads = k.get("heads") or column_heads(lines)
     order = k["order"]
