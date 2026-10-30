@@ -1,0 +1,94 @@
+% ==============================================================================
+% TABELLE PRONTE DA COPIARE E INCOLLARE NEL PAPER (LaTeX)
+% Richiedono nel preambolo: \usepackage{booktabs} \usepackage{multirow}
+% ==============================================================================
+
+% ------------------------------------------------------------------------------
+% 1. TABELLA PRINCIPALE (Panel A: TGN vs Baselines su 5 seed)
+% ------------------------------------------------------------------------------
+% Standalone wrapper of tab_baselines.tex (same numbers). Requires booktabs and multirow.
+\begin{table*}[t]
+\centering\small
+\caption{Detection performance on the held-out test split (mean $\pm$ std over 5 seeds). Recall@1\%FPR uses a global threshold calibrated on benign validation events; routed recall applies to Graphagate only.}
+\label{tab:baselines}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccccc}
+\toprule
+Class & Metric & Graphagate & IForest & IF (no prec.) & 2-Node TGN & Static GNN & OCSVM (no prec.) \\
+\midrule
+\multirow{4}{*}{Aggregate} & AUC & $0.897\pm0.028$ & $0.757\pm0.033$ & $0.704\pm0.048$ & $0.810\pm0.017$ & $0.789\pm0.052$ & $0.675\pm0.044$ \\
+ & AP & $0.641\pm0.073$ & $0.085\pm0.014$ & $0.072\pm0.020$ & $0.525\pm0.061$ & $0.324\pm0.124$ & $0.167\pm0.058$ \\
+ & Recall@1\%FPR & $0.672\pm0.083$ & $0.053\pm0.009$ & $0.031\pm0.012$ & $0.619\pm0.060$ & $0.379\pm0.126$ & $0.197\pm0.041$ \\
+ & Recall (routed) & $0.641\pm0.081$ & --- & --- & --- & --- & --- \\
+\midrule
+\multirow{6}{*}{Lateral} & AUC & $0.879\pm0.023$ & $0.905\pm0.050$ & $0.467\pm0.075$ & $0.556\pm0.019$ & $0.715\pm0.084$ & $0.438\pm0.070$ \\
+ & AP & $0.122\pm0.047$ & $0.066\pm0.015$ & $0.005\pm0.001$ & $0.006\pm0.001$ & $0.016\pm0.009$ & $0.005\pm0.001$ \\
+ & Recall@1\%FPR & $0.386\pm0.061$ & $0.145\pm0.043$ & $0.010\pm0.011$ & $0.153\pm0.068$ & $0.088\pm0.096$ & $0.004\pm0.004$ \\
+ & Recall (routed) & $0.337\pm0.060$ & --- & --- & --- & --- & --- \\
+ & Blocked@1\%FPR & $0.952\pm0.015$ & $0.566\pm0.060$ & $0.069\pm0.070$ & $0.624\pm0.151$ & $0.234\pm0.170$ & $0.024\pm0.022$ \\
+ & Blocked (routed) & $0.943\pm0.022$ & --- & --- & --- & --- & --- \\
+\midrule
+\multirow{6}{*}{Theft} & AUC & $0.612\pm0.086$ & $0.659\pm0.062$ & $0.699\pm0.072$ & $0.536\pm0.032$ & $0.704\pm0.036$ & $0.712\pm0.068$ \\
+ & AP & $0.019\pm0.006$ & $0.010\pm0.004$ & $0.022\pm0.013$ & $0.008\pm0.004$ & $0.043\pm0.016$ & $0.042\pm0.024$ \\
+ & Recall@1\%FPR & $0.143\pm0.016$ & $0.002\pm0.005$ & $0.057\pm0.028$ & $0.146\pm0.037$ & $0.189\pm0.050$ & $0.241\pm0.046$ \\
+ & Recall (routed) & $0.120\pm0.021$ & --- & --- & --- & --- & --- \\
+ & Blocked@1\%FPR & $0.625\pm0.074$ & $0.005\pm0.011$ & $0.173\pm0.088$ & $0.399\pm0.069$ & $0.536\pm0.061$ & $0.490\pm0.077$ \\
+ & Blocked (routed) & $0.527\pm0.103$ & --- & --- & --- & --- & --- \\
+\midrule
+\multirow{4}{*}{Policy} & AUC & $0.982\pm0.035$ & $0.933\pm0.035$ & $0.780\pm0.068$ & $0.968\pm0.018$ & $0.906\pm0.042$ & $0.714\pm0.054$ \\
+ & AP & $0.335\pm0.206$ & $0.036\pm0.059$ & $0.002\pm0.001$ & $0.432\pm0.143$ & $0.142\pm0.095$ & $0.004\pm0.003$ \\
+ & Recall@1\%FPR & $0.908\pm0.146$ & $0.229\pm0.127$ & $0.000\pm0.000$ & $0.910\pm0.063$ & $0.632\pm0.161$ & $0.154\pm0.120$ \\
+ & Recall (routed) & $0.882\pm0.136$ & --- & --- & --- & --- & --- \\
+\midrule
+\multirow{4}{*}{Contextual} & AUC & $0.952\pm0.010$ & $0.815\pm0.048$ & $0.666\pm0.055$ & $0.953\pm0.023$ & $0.978\pm0.019$ & $0.946\pm0.024$ \\
+ & AP & $0.386\pm0.121$ & $0.036\pm0.014$ & $0.003\pm0.001$ & $0.653\pm0.064$ & $0.731\pm0.139$ & $0.707\pm0.069$ \\
+ & Recall@1\%FPR & $0.898\pm0.020$ & $0.276\pm0.045$ & $0.018\pm0.012$ & $0.909\pm0.019$ & $0.955\pm0.027$ & $0.898\pm0.020$ \\
+ & Recall (routed) & $0.738\pm0.060$ & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+% ------------------------------------------------------------------------------
+% 2. TABELLA DI ABLAZIONE DELLE COMPONENTI (Panel D: Full vs no_config, no_precursor, no_hist)
+% ------------------------------------------------------------------------------
+% Standalone wrapper of tab_ablation.tex (same numbers). Requires booktabs and multirow.
+\begin{table*}[t]
+\centering\small
+\caption{Component ablation on the held-out test split (single seed, 1000; no dispersion). Each column switches one component off; recall@1\%FPR uses a global threshold calibrated on benign validation events.}
+\label{tab:ablation}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccc}
+\toprule
+Class & Metric & Full & w/o config node & w/o precursor prior & w/o history features \\
+\midrule
+\multirow{4}{*}{Aggregate} & AUC & $0.900$ & $0.924$ & $0.888$ & $0.892$ \\
+ & AP & $0.672$ & $0.697$ & $0.655$ & $0.655$ \\
+ & Recall@1\%FPR & $0.737$ & $0.698$ & $0.719$ & $0.701$ \\
+ & Recall (routed) & $0.693$ & $0.692$ & $0.694$ & $0.687$ \\
+\midrule
+\multirow{6}{*}{Lateral} & AUC & $0.851$ & $0.810$ & $0.776$ & $0.843$ \\
+ & AP & $0.088$ & $0.030$ & $0.056$ & $0.062$ \\
+ & Recall@1\%FPR & $0.405$ & $0.160$ & $0.300$ & $0.255$ \\
+ & Recall (routed) & $0.310$ & $0.180$ & $0.260$ & $0.225$ \\
+ & Blocked@1\%FPR & $0.957$ & $0.652$ & $0.913$ & $0.870$ \\
+ & Blocked (routed) & $0.957$ & $0.652$ & $0.913$ & $0.826$ \\
+\midrule
+\multirow{6}{*}{Theft} & AUC & $0.561$ & $0.749$ & $0.571$ & $0.512$ \\
+ & AP & $0.010$ & $0.010$ & $0.011$ & $0.006$ \\
+ & Recall@1\%FPR & $0.141$ & $0.047$ & $0.141$ & $0.024$ \\
+ & Recall (routed) & $0.094$ & $0.053$ & $0.118$ & $0.018$ \\
+ & Blocked@1\%FPR & $0.615$ & $0.205$ & $0.615$ & $0.103$ \\
+ & Blocked (routed) & $0.410$ & $0.231$ & $0.513$ & $0.077$ \\
+\midrule
+\multirow{4}{*}{Policy} & AUC & $0.998$ & $0.999$ & $0.998$ & $0.999$ \\
+ & AP & $0.353$ & $0.505$ & $0.290$ & $0.217$ \\
+ & Recall@1\%FPR & $1.000$ & $1.000$ & $1.000$ & $1.000$ \\
+ & Recall (routed) & $0.867$ & $0.933$ & $0.933$ & $0.933$ \\
+\midrule
+\multirow{4}{*}{Contextual} & AUC & $0.943$ & $0.946$ & $0.925$ & $0.934$ \\
+ & AP & $0.253$ & $0.358$ & $0.202$ & $0.285$ \\
+ & Recall@1\%FPR & $0.878$ & $0.898$ & $0.878$ & $0.878$ \\
+ & Recall (routed) & $0.735$ & $0.694$ & $0.755$ & $0.837$ \\
+\bottomrule
+\end{tabular}}
+\end{table*}
