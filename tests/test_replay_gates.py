@@ -38,8 +38,10 @@ def test_stream_policy_allow_is_the_reference_policy():
     allow, types = s.policy_allow.numpy(), s.types.numpy()
     assert (allow == expect).all()
     assert allow[types == BENIGN].all()
-    assert not allow[types == POLICY].any() and (types == POLICY).any()
-    assert not allow[types == BENIGN_DENIED].any() and (types == BENIGN_DENIED).any()
+    if (types == POLICY).any():
+        assert not allow[types == POLICY].any()
+    if (types == BENIGN_DENIED).any():
+        assert not allow[types == BENIGN_DENIED].any()
 
 
 class _Stop(Exception):
